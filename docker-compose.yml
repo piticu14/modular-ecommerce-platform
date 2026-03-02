@@ -1,0 +1,146 @@
+version: "3.9"
+
+services:
+
+  # ----------------------------
+  # API GATEWAY
+  # ----------------------------
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      - order-service
+      - product-service
+      - redis
+    networks:
+      - ecommerce-network
+
+  # ----------------------------
+  # ORDER SERVICE
+  # ----------------------------
+  order-service:
+    build: ./order-service
+    container_name: order-service
+    ports:
+      - "8001:8000"
+    depends_on:
+      - mysql-orders
+      - rabbitmq
+      - redis
+    environment:
+      DB_HOST: mysql-orders
+      DB_DATABASE: orders
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+    networks:
+      - ecommerce-network
+
+  # ----------------------------
+  # PRODUCT SERVICE
+  # ----------------------------
+  product-service:
+    build: ./product-service
+    container_name: product-service
+    ports:
+      - "8002:8000"
+    depends_on:
+      - mysql-products
+      - rabbitmq
+      - redis
+    environment:
+      DB_HOST: mysql-products
+      DB_DATABASE: products
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+    networks:
+      - ecommerce-network
+
+  # ----------------------------
+  # FRONTEND (React)
+  # ----------------------------
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-gateway
+    networks:
+      - ecommerce-network
+
+  # ----------------------------
+  # MYSQL - ORDERS
+  # ----------------------------
+  mysql-orders:
+    image: mysql:8
+    container_name: mysql-orders
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: orders
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-orders-data:/var/lib/mysql
+    networks:
+      - ecommerce-network
+
+  # ----------------------------
+  # MYSQL - PRODUCTS
+  # ----------------------------
+  mysql-products:
+    image: mysql:8
+    container_name: mysql-products
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: products
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql-products-data:/var/lib/mysql
+    networks:
+      - ecommerce-network
+
+  # ----------------------------
+  # REDIS
+  # ----------------------------
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - ecommerce-network
+
+  # ----------------------------
+  # RABBITMQ
+  # ----------------------------
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # Management UI
+    networks:
+      - ecommerce-network
+
+# ----------------------------
+# NETWORK
+# ----------------------------
+networks:
+  ecommerce-network:
+    driver: bridge
+
+# ----------------------------
+# VOLUMES
+# ----------------------------
+volumes:
+  mysql-orders-data:
+  mysql-products-data:
