@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    'jwt' => [
+        'secret' => env('JWT_SECRET'),
+    ],
+
+    'proxy' => [
+        'services' => [
+            'auth' => env('AUTH_SERVICE_URL'),
+            'orders' => env('ORDER_SERVICE_URL'),
+            'products' => env('PRODUCT_SERVICE_URL'),
+        ],
+    ],
+
 ];
