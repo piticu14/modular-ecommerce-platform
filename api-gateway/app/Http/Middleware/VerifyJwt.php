@@ -3,13 +3,18 @@
     namespace App\Http\Middleware;
 
     use Closure;
+    use Firebase\JWT\ExpiredException;
     use Firebase\JWT\JWT;
     use Firebase\JWT\Key;
+
 
     class VerifyJwt
     {
         public function handle($request, Closure $next)
         {
+            $request->headers->remove('X-User-Id');
+            $request->headers->remove('X-User-Email');
+
             $header = $request->header('Authorization');
 
             if (!$header || !str_starts_with($header, 'Bearer ')) {
@@ -19,16 +24,23 @@
             $token = substr($header, 7);
 
             try {
+
                 $payload = JWT::decode(
                     $token,
                     new Key(config('services.jwt.secret'), 'HS256')
                 );
 
-                // přidáme user_id do requestu
                 $request->headers->set('X-User-Id', $payload->sub);
+                $request->headers->set('X-User-Email', $payload->email ?? '');
+
+            } catch (ExpiredException $e) {
+
+                return response()->json(['error' => 'Token expired'], 401);
 
             } catch (\Exception $e) {
+
                 return response()->json(['error' => 'Invalid token'], 401);
+
             }
 
             return $next($request);

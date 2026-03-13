@@ -7,7 +7,7 @@
 
     class ProxyController extends Controller
     {
-        public function forward(Request $request, string $service, string $path = '')
+        public function forward(Request $request, string $service)
         {
             $services = config('services.proxy.services');
 
@@ -17,7 +17,7 @@
                 abort(Response::HTTP_NOT_FOUND, 'Unknown service.');
             }
 
-            $url = rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
+            $url = rtrim($baseUrl, '/') . '/' . ltrim($request->path(), '/');
 
             $response = Http::timeout(5)
                 ->retry(2, 100)
