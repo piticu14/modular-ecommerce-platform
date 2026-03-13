@@ -1,146 +1,242 @@
-version: "3.9"
-
 services:
+  # ----------------------------
+  # INFRA
+  # ----------------------------
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks: [ecommerce-network]
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379" # klidně můžeš odstranit, je to jen pro debug
+    networks: [ecommerce-network]
+
+  mysql-orders:
+    image: mysql:8
+    container_name: mysql-orders
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: orders
+    ports:
+      - "3307:3306" # debug
+    volumes:
+      - mysql-orders-data:/var/lib/mysql
+    networks: [ecommerce-network]
+
+  mysql-products:
+    image: mysql:8
+    container_name: mysql-products
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: products
+    ports:
+      - "3308:3306" # debug
+    volumes:
+      - mysql-products-data:/var/lib/mysql
+    networks: [ecommerce-network]
 
   # ----------------------------
-  # API GATEWAY
+  # API GATEWAY (nginx + php-fpm)
   # ----------------------------
-  api-gateway:
-    build: ./api-gateway
-    container_name: api-gateway
+  api-nginx:
+    image: nginx:alpine
+    container_name: api-nginx
     ports:
-      - "8000:8000"
+      - "8000:80"
+    volumes:
+      - ./api-gateway:/var/www/html
+      - ./api-gateway/.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - order-service
-      - product-service
+      - api-php
+    networks: [ecommerce-network]
+
+  api-php:
+    build: ./api-gateway
+    container_name: api-php
+    volumes:
+      - ./api-gateway:/var/www/html
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+
+      # service discovery (gateway volá služby přes nginx kontejnery)
+      ORDER_SERVICE_URL: http://order-nginx
+      PRODUCT_SERVICE_URL: http://product-nginx
+
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_EXCHANGE: ecommerce.events
+    depends_on:
       - redis
-    networks:
-      - ecommerce-network
+      - rabbitmq
+      - order-nginx
+      - product-nginx
+    networks: [ecommerce-network]
+
+  # (volitelné) worker pro gateway, pokud bude mít joby
+  api-worker:
+    build: ./api-gateway
+    container_name: api-worker
+    command: php artisan queue:work --tries=3 --timeout=90
+    volumes:
+      - ./api-gateway:/var/www/html
+    environment:
+      APP_ENV: local
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_EXCHANGE: ecommerce.events
+    depends_on:
+      - api-php
+      - redis
+      - rabbitmq
+    networks: [ecommerce-network]
 
   # ----------------------------
-  # ORDER SERVICE
+  # ORDER SERVICE (nginx + php-fpm)
   # ----------------------------
-  order-service:
-    build: ./order-service
-    container_name: order-service
+  order-nginx:
+    image: nginx:alpine
+    container_name: order-nginx
     ports:
-      - "8001:8000"
+      - "8001:80" # debug z hosta
+    volumes:
+      - ./order-service:/var/www/html
+      - ./order-service/.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - order-php
+    networks: [ecommerce-network]
+
+  order-php:
+    build: ./order-service
+    container_name: order-php
+    volumes:
+      - ./order-service:/var/www/html
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+
+      DB_HOST: mysql-orders
+      DB_DATABASE: orders
+      DB_USERNAME: root
+      DB_PASSWORD: root
+
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_EXCHANGE: ecommerce.events
     depends_on:
       - mysql-orders
-      - rabbitmq
       - redis
+      - rabbitmq
+    networks: [ecommerce-network]
+
+  order-worker:
+    build: ./order-service
+    container_name: order-worker
+    command: php artisan queue:work --tries=3 --timeout=90
+    volumes:
+      - ./order-service:/var/www/html
     environment:
+      APP_ENV: local
       DB_HOST: mysql-orders
       DB_DATABASE: orders
       DB_USERNAME: root
       DB_PASSWORD: root
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
-    networks:
-      - ecommerce-network
+      RABBITMQ_EXCHANGE: ecommerce.events
+    depends_on:
+      - order-php
+      - mysql-orders
+      - redis
+      - rabbitmq
+    networks: [ecommerce-network]
 
   # ----------------------------
-  # PRODUCT SERVICE
+  # PRODUCT SERVICE (nginx + php-fpm)
   # ----------------------------
-  product-service:
-    build: ./product-service
-    container_name: product-service
+  product-nginx:
+    image: nginx:alpine
+    container_name: product-nginx
     ports:
-      - "8002:8000"
+      - "8002:80" # debug z hosta
+    volumes:
+      - ./product-service:/var/www/html
+      - ./product-service/.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - product-php
+    networks: [ecommerce-network]
+
+  product-php:
+    build: ./product-service
+    container_name: product-php
+    volumes:
+      - ./product-service:/var/www/html
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+
+      DB_HOST: mysql-products
+      DB_DATABASE: products
+      DB_USERNAME: root
+      DB_PASSWORD: root
+
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_EXCHANGE: ecommerce.events
     depends_on:
       - mysql-products
-      - rabbitmq
       - redis
+      - rabbitmq
+    networks: [ecommerce-network]
+
+  product-worker:
+    build: ./product-service
+    container_name: product-worker
+    command: php artisan queue:work --tries=3 --timeout=90
+    volumes:
+      - ./product-service:/var/www/html
     environment:
+      APP_ENV: local
       DB_HOST: mysql-products
       DB_DATABASE: products
       DB_USERNAME: root
       DB_PASSWORD: root
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
-    networks:
-      - ecommerce-network
+      RABBITMQ_EXCHANGE: ecommerce.events
+    depends_on:
+      - product-php
+      - mysql-products
+      - redis
+      - rabbitmq
+    networks: [ecommerce-network]
 
   # ----------------------------
-  # FRONTEND (React)
+  # FRONTEND
   # ----------------------------
   frontend:
     build: ./frontend
     container_name: frontend
     ports:
       - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
-      - api-gateway
-    networks:
-      - ecommerce-network
+      - api-nginx
+    networks: [ecommerce-network]
 
-  # ----------------------------
-  # MYSQL - ORDERS
-  # ----------------------------
-  mysql-orders:
-    image: mysql:8
-    container_name: mysql-orders
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: orders
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql-orders-data:/var/lib/mysql
-    networks:
-      - ecommerce-network
-
-  # ----------------------------
-  # MYSQL - PRODUCTS
-  # ----------------------------
-  mysql-products:
-    image: mysql:8
-    container_name: mysql-products
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: products
-    ports:
-      - "3308:3306"
-    volumes:
-      - mysql-products-data:/var/lib/mysql
-    networks:
-      - ecommerce-network
-
-  # ----------------------------
-  # REDIS
-  # ----------------------------
-  redis:
-    image: redis:7
-    container_name: redis
-    ports:
-      - "6379:6379"
-    networks:
-      - ecommerce-network
-
-  # ----------------------------
-  # RABBITMQ
-  # ----------------------------
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"     # AMQP
-      - "15672:15672"   # Management UI
-    networks:
-      - ecommerce-network
-
-# ----------------------------
-# NETWORK
-# ----------------------------
 networks:
   ecommerce-network:
     driver: bridge
 
-# ----------------------------
-# VOLUMES
-# ----------------------------
 volumes:
   mysql-orders-data:
   mysql-products-data:
