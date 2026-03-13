@@ -77,6 +77,7 @@ services:
   auth-php:
     build: ./auth-service
     container_name: auth-php
+    user: "1000:1000"
     volumes:
       - ./auth-service:/var/www/html
     environment:
@@ -115,6 +116,7 @@ services:
   api-php:
     build: ./api-gateway
     container_name: api-php
+    user: "1000:1000"
     volumes:
       - ./api-gateway:/var/www/html
     environment:
@@ -174,6 +176,7 @@ services:
   order-php:
     build: ./order-service
     container_name: order-php
+    user: "1000:1000"
     volumes:
       - ./order-service:/var/www/html
     environment:
@@ -234,6 +237,7 @@ services:
   product-php:
     build: ./product-service
     container_name: product-php
+    user: "1000:1000"
     volumes:
       - ./product-service:/var/www/html
     environment:
