@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('processed_events', function (Blueprint $table) {
 
             $table->uuid('event_id')->primary();
-
+            $table->string('consumer');
             $table->timestamp('processed_at');
 
         });

@@ -40,4 +40,8 @@ return [
         'timeout' => env('PRODUCT_SERVICE_TIMEOUT', 2),
     ],
 
+    'internal' => [
+        'token' => env('INTERNAL_SIGNATURE_SECRET'),
+    ],
+
 ];

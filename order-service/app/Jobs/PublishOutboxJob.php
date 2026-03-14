@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use app\Messaging\Publishers\RabbitPublisher;
+use App\Messaging\Publishers\RabbitPublisher;
 use App\Models\OutboxEvent;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -21,10 +21,7 @@ class PublishOutboxJob implements ShouldQueue
 
             try {
 
-                $publisher->publish(
-                    $event->routing_key,
-                    $event->payload
-                );
+                $publisher->publish($event);
 
                 $event->update([
                     'published_at' => now()
@@ -37,5 +34,10 @@ class PublishOutboxJob implements ShouldQueue
                 throw $e;
             }
         }
+    }
+
+    public function getName(): string
+    {
+        return 'rabbitmq.raw.message';
     }
 }

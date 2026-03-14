@@ -16,12 +16,13 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('event_type');
             $table->string('routing_key');
+            $table->uuid('correlation_id')->nullable();
             $table->json('payload');
             $table->timestamp('occurred_at');
             $table->timestamp('published_at')->nullable();
             $table->unsignedInteger('attempts')->default(0);
             $table->timestamps();
-            $table->index(['published_at']);
+            $table->index(['published_at', 'occurred_at']);
         });
     }
 

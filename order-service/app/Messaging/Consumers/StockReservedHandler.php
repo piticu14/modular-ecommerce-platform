@@ -5,25 +5,29 @@
     use App\Models\Order;
     use App\Models\ProcessedEvent;
     use Illuminate\Support\Facades\DB;
+    use Illuminate\Support\Facades\Log;
 
     class StockReservedHandler
     {
         public function handle(array $event): void
         {
             $eventId = $event['event_id'];
-            $orderId = $event['payload']['order_id'];
+            $orderId = $event['data']['order_id'];
 
-            try {
+            $exists = ProcessedEvent::where([
+                'event_id' => $eventId,
+                'consumer' => 'stock_reserved'
+            ])->exists();
 
-                ProcessedEvent::create([
-                    'event_id' => $eventId,
-                    'processed_at' => now(),
-                ]);
-
-            } catch (\Illuminate\Database\QueryException $e) {
-
-                return; // duplicate
+            if ($exists) {
+                return;
             }
+
+            ProcessedEvent::create([
+                'event_id' => $eventId,
+                'consumer' => 'stock_reserved',
+                'processed_at' => now(),
+            ]);
 
             DB::transaction(function () use ($orderId) {
 
@@ -35,6 +39,11 @@
 
                 $order->update([
                     'status' => 'CONFIRMED'
+                ]);
+
+                Log::info('StockReserved received', [
+                    'order_id' => $orderId,
+                    'correlation_id' => $event['correlation_id'] ?? null,
                 ]);
 
             });

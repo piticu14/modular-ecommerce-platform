@@ -9,10 +9,6 @@ echo "Services ready."
 
 php artisan migrate --force --isolated || true
 
-#php artisan rabbit:setup
+echo "Starting Outbox Worker..."
 
-php artisan queue:work rabbitmq \
-  --sleep=1 \
-  --tries=3 \
-  --timeout=90 \
-  --max-jobs=1000
+exec php artisan outbox:work

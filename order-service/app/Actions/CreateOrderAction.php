@@ -2,12 +2,13 @@
 
     namespace App\Actions;
 
-    use App\Data\CreateOrderItemData;
-    use App\Exceptions\ProductNotFoundException;
+    use App\Dto\CreateOrderItemData;
+    use App\Dto\ProductSnapshot;
     use App\Messaging\Payloads\OrderCreatedPayload;
     use App\Models\Order;
     use App\Models\OutboxEvent;
     use App\Services\ProductServiceClient;
+    use App\Support\RequestContext;
     use Illuminate\Http\Client\ConnectionException;
     use Illuminate\Http\Client\RequestException;
     use Illuminate\Support\Facades\DB;
@@ -24,13 +25,14 @@
          * @throws \Throwable
          * @throws ConnectionException
          */
-        public function execute(array $items, $user): Order
+        public function execute(array $items, int $userId): Order
         {
-            dd($items);
+
             $items = array_map(
                 fn (array $item) => CreateOrderItemData::from($item),
                 $items
             );
+
 
             $productIds = array_map(
                 fn (CreateOrderItemData $item): int => $item->productId,
@@ -39,30 +41,31 @@
 
             $products = $this->productServiceClient->getProducts($productIds);
 
-            return DB::transaction(function () use ($items, $products, $user) {
+            return DB::transaction(function () use ($items, $products, $userId) {
 
                 $order = Order::create([
-                    'user_id' => $user['id'] ?? null,
+                    'user_id' => $userId,
                     'status' => 'PENDING',
                     'currency' => $this->resolveCurrency($items, $products),
                     'subtotal' => 0,
                     'total' => 0
                 ]);
 
-                $total = $subtotal = 0;
+                $subtotal = 0;
 
                 foreach ($items as $item) {
 
-                    $product = $products[$item['product_id']] ?? null;
+                    $product = $products[$item->productId] ?? null;
 
                     $unitPrice = (int) $product->price;
 
-                    $lineTotal = $unitPrice * $item['quantity'];
+                    $lineTotal = $unitPrice * $item->quantity;
 
                     $order->items()->create([
                         'product_id' => $product->id,
                         'product_name' => $product->name,
                         'unit_price' => $unitPrice,
+                        'currency' => $product->currency,
                         'quantity' => $item->quantity,
                         'line_total' => $lineTotal,
                     ]);
@@ -78,13 +81,22 @@
 
 
                 DB::afterCommit(function () use ($order) {
+                    $eventId = (string) Str::uuid();
+                    $occurredAt = now();
+                    $correlationId = RequestContext::correlationId();
 
                     OutboxEvent::create([
-                        'id' => Str::uuid(),
-                        'event_type' => 'OrderCreated',
+                        'id' => $eventId,
+                        'event_type' => 'OrderCrated',
                         'routing_key' => 'order.created',
-                        'payload' => OrderCreatedPayload::build($order),
-                        'occurred_at' => now()
+                        'payload' => OrderCreatedPayload::build(
+                            order: $order,
+                            eventId: $eventId,
+                            occurredAt: $occurredAt,
+                            correlationId: $correlationId,
+                        ),
+                        'correlation_id' => $correlationId,
+                        'occurred_at' => $occurredAt,
                     ]);
 
                 });
@@ -96,7 +108,7 @@
 
         /**
          * @param array<int, CreateOrderItemData> $items
-         * @param array<int, \App\Data\ProductSnapshot> $products
+         * @param array<int, ProductSnapshot> $products
          */
         private function resolveCurrency(array $items, array $products): string
         {

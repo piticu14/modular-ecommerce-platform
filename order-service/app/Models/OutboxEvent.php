@@ -12,7 +12,8 @@
             'payload',
             'routing_key',
             'occurred_at',
-            'published_at'
+            'published_at',
+            'correlation_id'
         ];
 
         protected $casts = [

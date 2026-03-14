@@ -13,6 +13,7 @@
             'product_name',
             'unit_price',
             'quantity',
+            'currency',
             'line_total',
         ];
 

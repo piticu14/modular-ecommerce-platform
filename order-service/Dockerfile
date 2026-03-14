@@ -30,7 +30,9 @@ RUN chmod +x /usr/local/bin/wait-for
 COPY order-service/.docker/entrypoint.sh /usr/local/bin/entrypoint
 RUN chmod +x /usr/local/bin/entrypoint
 
-
 WORKDIR /var/www/html
+
+# Set permissions for Laravel
+RUN chown -R www-data:www-data /var/www/html
 
 ENTRYPOINT ["entrypoint"]

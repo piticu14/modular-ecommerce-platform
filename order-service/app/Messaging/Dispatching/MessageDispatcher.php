@@ -2,8 +2,8 @@
 
     namespace App\Messaging\Dispatching;
 
-    use app\Messaging\Consumers\StockFailedHandler;
-    use app\Messaging\Consumers\StockReservedHandler;
+    use App\Messaging\Consumers\StockFailedHandler;
+    use App\Messaging\Consumers\StockReservedHandler;
     use Illuminate\Support\Facades\Redis;
 
     class MessageDispatcher
@@ -41,8 +41,7 @@
             }
 
             foreach ($this->handlers[$eventType] as $handler) {
-                dispatch(new $handler($event));
-
+                app($handler)->handle($event);
             }
         }
     }

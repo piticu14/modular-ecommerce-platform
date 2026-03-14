@@ -6,6 +6,7 @@
     use App\Http\Requests\StoreOrderRequest;
     use App\Http\Resources\OrderResource;
     use App\Models\Order;
+    use App\Support\RequestContext;
     use Illuminate\Http\Client\ConnectionException;
     use Illuminate\Http\Client\RequestException;
     use Illuminate\Http\JsonResponse;
@@ -25,8 +26,8 @@
         ): JsonResponse {
 
             $order = $action->execute(
-                $request->validated(),
-                $request->user()
+                items: $request->validated('items'),
+                userId: RequestContext::userId(),
             );
 
             return response()->json([
