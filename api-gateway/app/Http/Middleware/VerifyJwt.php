@@ -13,7 +13,6 @@
         public function handle($request, Closure $next)
         {
             $request->headers->remove('X-User-Id');
-            $request->headers->remove('X-User-Email');
 
             $header = $request->header('Authorization');
 
@@ -31,7 +30,6 @@
                 );
 
                 $request->headers->set('X-User-Id', $payload->sub);
-                $request->headers->set('X-User-Email', $payload->email ?? '');
 
             } catch (ExpiredException $e) {
 

@@ -41,10 +41,23 @@ return [
 
     'proxy' => [
         'services' => [
-            'auth' => env('AUTH_SERVICE_URL'),
-            'orders' => env('ORDER_SERVICE_URL'),
-            'products' => env('PRODUCT_SERVICE_URL'),
+            'auth' => [
+                'url' => env('AUTH_SERVICE_URL'),
+                'signed' => false,
+            ],
+            'orders' => [
+                'url' => env('ORDER_SERVICE_URL'),
+                'signed' => true,
+            ],
+            'products' => [
+                'url' => env('PRODUCT_SERVICE_URL'),
+                'signed' => true,
+            ],
         ],
+    ],
+
+    'internal' => [
+        'token' => env('INTERNAL_SIGNATURE_SECRET'),
     ],
 
 ];
