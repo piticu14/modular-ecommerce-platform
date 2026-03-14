@@ -1,0 +1,128 @@
+{
+    "users": [
+        {
+            "name": "app",
+            "password_hash": "6+gtbmVIUtsN+A23UJPMlWfTYDD/oACtwFh0I1lnD7Vv1K45",
+            "hashing_algorithm": "rabbit_password_hashing_sha256",
+            "tags": "administrator"
+        }
+    ],
+    "permissions": [
+        {
+            "user": "app",
+            "vhost": "/",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        }
+    ],
+    "vhosts": [
+        {
+            "name": "/"
+        }
+    ],
+
+    "exchanges": [
+        {
+            "name": "ecommerce.events",
+            "vhost": "/",
+            "type": "topic",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false
+        },
+
+        {
+            "name": "ecommerce.retry",
+            "vhost": "/",
+            "type": "topic",
+            "durable": true
+        }
+    ],
+
+    "queues": [
+        {
+            "name": "order-service",
+            "vhost": "/",
+            "durable": true,
+            "arguments": {
+                "x-dead-letter-exchange": "ecommerce.retry"
+            }
+        },
+
+        {
+            "name": "order-service.retry",
+            "vhost": "/",
+            "durable": true,
+            "arguments": {
+                "x-message-ttl": 10000,
+                "x-dead-letter-exchange": "ecommerce.events"
+            }
+        },
+
+        {
+            "name": "order-service.dlq",
+            "vhost": "/",
+            "durable": true
+        },
+
+        {
+            "name": "product-service",
+            "vhost": "/",
+            "durable": true,
+            "arguments": {
+                "x-dead-letter-exchange": "ecommerce.retry"
+            }
+        },
+
+        {
+            "name": "product-service.retry",
+            "vhost": "/",
+            "durable": true,
+            "arguments": {
+                "x-message-ttl": 10000,
+                "x-dead-letter-exchange": "ecommerce.events"
+            }
+        },
+
+        {
+            "name": "product-service.dlq",
+            "vhost": "/",
+            "durable": true
+        }
+    ],
+
+    "bindings": [
+
+        {
+            "source": "ecommerce.events",
+            "vhost": "/",
+            "destination": "order-service",
+            "destination_type": "queue",
+            "routing_key": "stock.*"
+        },
+
+        {
+            "source": "ecommerce.events",
+            "vhost": "/",
+            "destination": "product-service",
+            "destination_type": "queue",
+            "routing_key": "order.created"
+        },
+
+        {
+            "source": "ecommerce.retry",
+            "vhost": "/",
+            "destination": "order-service.retry",
+            "destination_type": "queue",
+            "routing_key": "stock.*"
+        },
+        {
+            "source": "ecommerce.retry",
+            "vhost": "/",
+            "destination": "product-service.retry",
+            "destination_type": "queue",
+            "routing_key": "order.created"
+        }
+    ]
+}

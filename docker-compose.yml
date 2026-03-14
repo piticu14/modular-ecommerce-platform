@@ -8,7 +8,12 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-    networks: [ecommerce-network]
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+    networks:
+      - ecommerce-network
 
   redis:
     image: redis:7
@@ -145,6 +150,7 @@ services:
     build: ./api-gateway
     container_name: api-worker
     command: php artisan queue:work --tries=3 --timeout=90
+    restart: unless-stopped
     volumes:
       - ./api-gateway:/var/www/html
     environment:
@@ -200,7 +206,8 @@ services:
   order-worker:
     build: ./order-service
     container_name: order-worker
-    command: php artisan queue:work --tries=3 --timeout=90
+    entrypoint: ["/var/www/html/.docker/worker-entrypoint.sh"]
+    restart: unless-stopped
     volumes:
       - ./order-service:/var/www/html
     environment:
@@ -262,6 +269,7 @@ services:
     build: ./product-service
     container_name: product-worker
     command: php artisan queue:work --tries=3 --timeout=90
+    restart: unless-stopped
     volumes:
       - ./product-service:/var/www/html
     environment:
@@ -303,3 +311,4 @@ volumes:
   mysql-orders-data:
   mysql-products-data:
   mysql-auth-data:
+  rabbitmq_data:
