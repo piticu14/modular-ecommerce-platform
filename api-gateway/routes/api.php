@@ -12,15 +12,13 @@
 
         /*
         |--------------------------------------------------------------------------
-        | AUTH
+        | AUTH (public)
         |--------------------------------------------------------------------------
         */
 
-        Route::post('/auth/login', fn() => app(ProxyController::class)->forward(request(), 'auth', 'login')
-        );
+        Route::post('/auth/login', fn() => app(ProxyController::class)->forward(request(), 'auth'));
 
-        Route::post('/auth/register', fn() => app(ProxyController::class)->forward(request(), 'auth', 'register')
-        );
+        Route::post('/auth/register', fn() => app(ProxyController::class)->forward(request(), 'auth'));
 
 
         /*
@@ -31,24 +29,16 @@
 
         Route::middleware(['jwt', 'throttle:api'])->group(function () {
 
-            Route::get('/auth/me', fn () =>
-                app(ProxyController::class)->forward(request(), 'auth', 'me')
-            );
-
-            Route::post('/auth/logout', fn () =>
-             app(ProxyController::class)->forward(request(), 'auth', 'logout')
-            );
-
-            Route::post('/auth/refresh', fn () =>
-                app(ProxyController::class)->forward(request(), 'auth', 'refresh')
-            );
-
-            Route::any('/orders/{path?}', fn($path = '') =>
-                app(ProxyController::class)->forward(request(), 'orders', $path)
+            Route::prefix('auth')->any('/{path?}', fn () =>
+                app(ProxyController::class)->forward(request(), 'auth')
             )->where('path', '.*');
 
-            Route::any('/products/{path?}', fn($path = '') =>
-                app(ProxyController::class)->forward(request(), 'products', $path)
+            Route::any('/orders/{path?}', fn() =>
+                app(ProxyController::class)->forward(request(), 'orders')
+            )->where('path', '.*');
+
+            Route::any('/products/{path?}', fn() =>
+                app(ProxyController::class)->forward(request(), 'products')
             )->where('path', '.*');
 
         });

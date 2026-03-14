@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'product_service' => [
+        'base_url' => env('PRODUCT_SERVICE_URL', 'http://product-service:8000'),
+        'timeout' => env('PRODUCT_SERVICE_TIMEOUT', 2),
+    ],
+
 ];

@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
     libonig-dev \
+    netcat-openbsd \
     curl \
   && docker-php-ext-install \
     pdo_mysql \
@@ -14,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     zip \
     opcache \
     pcntl \
+    sockets \
   && pecl install redis \
   && docker-php-ext-enable redis \
   && rm -rf /var/lib/apt/lists/*
