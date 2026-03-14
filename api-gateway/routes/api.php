@@ -1,14 +1,7 @@
 <?php
 
-    use App\Http\Controllers\HealthController;
     use App\Http\Controllers\ProxyController;
 
-        /*
-        |--------------------------------------------------------------------------
-        | HEALTH
-        |--------------------------------------------------------------------------
-        */
-        Route::get('/health', [HealthController::class, 'index']);
 
         /*
         |--------------------------------------------------------------------------

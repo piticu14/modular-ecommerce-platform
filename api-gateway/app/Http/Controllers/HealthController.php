@@ -12,20 +12,27 @@
 
             $results = [];
 
-            foreach ($services as $name => $url) {
+            foreach ($services as $name => $service) {
+
+                $start = microtime(true);
 
                 try {
+                    $response = Http::timeout(2)->get(rtrim($service['url'], '/') . '/health');
 
-                    $response = Http::timeout(2)->get("$url/health");
+                    $latency = round((microtime(true) - $start) * 1000);
 
                     $results[$name] = [
-                        'status' => $response->successful() ? 'UP' : 'DOWN'
+                        'status' => $response->successful() ? 'UP' : 'DOWN',
+                        'http_status' => $response->status(),
+                        'latency_ms' => $latency,
                     ];
-
                 } catch (\Throwable $e) {
+                    $latency = round((microtime(true) - $start) * 1000);
 
                     $results[$name] = [
-                        'status' => 'DOWN'
+                        'status' => 'DOWN',
+                        'latency_ms' => $latency,
+                        'error' => class_basename($e),
                     ];
 
                 }
@@ -33,7 +40,12 @@
             }
 
             return response()->json([
-                'gateway' => 'UP',
+                'gateway' => [
+                    'status' => 'UP',
+                    'version' => config('app.version'),
+                    'service' => config('app.name'),
+                ],
+                'timestamp' => now()->toISOString(),
                 'services' => $results
             ]);
         }

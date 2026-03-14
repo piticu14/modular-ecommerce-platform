@@ -16,6 +16,19 @@ return [
     'name' => env('APP_NAME', 'Laravel'),
 
     /*
+     |--------------------------------------------------------------------------
+     | Application Version
+     |--------------------------------------------------------------------------
+     |
+     | This value represents the current version of the application. It is
+     | typically injected during deployment (for example via CI/CD) and is
+     | exposed through health endpoints or logs to help identify which build
+     | of the service is currently running.
+     |
+     */
+    'version' => env('APP_VERSION', '1.0.0'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------

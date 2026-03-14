@@ -2,5 +2,7 @@
 
     use App\Http\Controllers\OrderController;
 
-    Route::post('/orders', [OrderController::class, 'store']);
-    Route::get('/orders/{order:uuid}', [OrderController::class, 'show']);
+    Route::middleware(['internal.signature', 'user.context'])->group(function () {
+        Route::post('/orders', [OrderController::class, 'store']);
+        Route::get('/orders/{order:uuid}', [OrderController::class, 'show']);
+    });
