@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'internal' => [
+        'token' => env('INTERNAL_SIGNATURE_SECRET'),
+    ],
+
+
 ];

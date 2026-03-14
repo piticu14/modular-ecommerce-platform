@@ -1,0 +1,30 @@
+<?php
+    namespace App\Messaging\Payloads;
+
+    use Carbon\CarbonInterface;
+    use Illuminate\Support\Collection;
+
+    class StockReservedPayload extends EventPayload
+    {
+        public static function build(
+            int $orderId,
+            string $eventId,
+            CarbonInterface $occurredAt,
+            string $correlationId,
+            Collection $items
+        ): array
+    {
+        return self::envelope(
+            $eventId,
+            'StockReserved',
+            'product-service',
+            $occurredAt,
+            $correlationId,
+            [
+                'order_id' => $orderId,
+                'items' => $items->values()->all(),
+            ]
+        );
+    }
+    }
+

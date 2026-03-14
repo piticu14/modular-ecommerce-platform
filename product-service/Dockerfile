@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
     libonig-dev \
+    netcat-openbsd \
     curl \
   && docker-php-ext-install \
     pdo_mysql \
@@ -22,9 +23,16 @@ RUN apt-get update && apt-get install -y \
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# entrypoint
+COPY docker/wait-for.sh /usr/local/bin/wait-for
+RUN chmod +x /usr/local/bin/wait-for
+
+COPY order-service/.docker/entrypoint.sh /usr/local/bin/entrypoint
+RUN chmod +x /usr/local/bin/entrypoint
+
 WORKDIR /var/www/html
 
 # Set permissions for Laravel
 RUN chown -R www-data:www-data /var/www/html
 
-CMD ["php-fpm"]
+ENTRYPOINT ["entrypoint"]
