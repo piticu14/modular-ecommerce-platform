@@ -235,6 +235,20 @@ services:
       - rabbitmq
     networks: [ecommerce-network]
 
+  order-outbox-worker:
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
+    container_name: order-outbox-worker
+    entrypoint: ["/var/www/html/.docker/outbox-worker-entrypoint.sh"]
+    restart: unless-stopped
+    volumes:
+      - ./order-service:/var/www/html
+    depends_on:
+      - mysql-orders
+      - rabbitmq
+    networks: [ecommerce-network]
+
   # ----------------------------
   # PRODUCT SERVICE (nginx + php-fpm)
   # ----------------------------
@@ -281,7 +295,7 @@ services:
       context: .
       dockerfile: product-service/Dockerfile
     container_name: product-worker
-    command: php artisan queue:work --tries=3 --timeout=90
+    entrypoint: ["/var/www/html/.docker/worker-entrypoint.sh"]
     restart: unless-stopped
     volumes:
       - ./product-service:/var/www/html
@@ -298,6 +312,20 @@ services:
       - product-php
       - mysql-products
       - redis
+      - rabbitmq
+    networks: [ecommerce-network]
+
+  product-outbox-worker:
+    build:
+      context: .
+      dockerfile: product-service/Dockerfile
+    container_name: product-outbox-worker
+    entrypoint: ["/var/www/html/.docker/outbox-worker-entrypoint.sh"]
+    restart: unless-stopped
+    volumes:
+      - ./product-service:/var/www/html
+    depends_on:
+      - mysql-products
       - rabbitmq
     networks: [ecommerce-network]
 
