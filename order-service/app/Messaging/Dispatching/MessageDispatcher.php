@@ -1,5 +1,6 @@
 <?php
 
+    namespace App\Messaging\Dispatching;
 
     use app\Messaging\Consumers\StockFailedHandler;
     use app\Messaging\Consumers\StockReservedHandler;

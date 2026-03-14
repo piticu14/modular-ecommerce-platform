@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Data;
+namespace App\Dto;
 
 final readonly class ProductSnapshot
 {

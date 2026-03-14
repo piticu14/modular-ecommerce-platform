@@ -26,6 +26,12 @@
          */
         public function execute(array $items, $user): Order
         {
+            dd($items);
+            $items = array_map(
+                fn (array $item) => CreateOrderItemData::from($item),
+                $items
+            );
+
             $productIds = array_map(
                 fn (CreateOrderItemData $item): int => $item->productId,
                 $items

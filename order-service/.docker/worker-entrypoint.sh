@@ -2,19 +2,21 @@
 
 set -e
 
-echo "Waiting for RabbitMQ..."
+#!/bin/sh
 
-while ! nc -z rabbitmq 5672; do
-  sleep 1
-done
+set -e
 
-echo "RabbitMQ ready"
+wait-for mysql-orders 3306
+wait-for rabbitmq 5672
 
-php artisan migrate --force || true
+echo "Services ready."
+
+php artisan migrate --force --isolated || true
 
 #php artisan rabbit:setup
 
 php artisan queue:work rabbitmq \
   --sleep=1 \
   --tries=3 \
-  --timeout=90
+  --timeout=90 \
+  --max-jobs=1000

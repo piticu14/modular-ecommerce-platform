@@ -1,18 +1,18 @@
 <?php
 
 
-    namespace App\Queue\Jobs;
+    namespace App\Jobs;
 
-    use MessageDispatcher;
-    use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
+    use App\Messaging\Dispatching\MessageDispatcher;
+    use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob as BaseJob;
 
-    class ProcessRabbitMQMessageJob extends RabbitMQJob
+    class ProcessRabbitMQMessageJob extends BaseJob
     {
         public function fire()
         {
             try {
 
-                $payload = json_decode($this->getRawBody(), true);
+                $payload = $this->payload();
 
                 app(MessageDispatcher::class)->dispatch($payload);
 

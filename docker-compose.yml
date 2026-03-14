@@ -80,8 +80,11 @@ services:
     networks: [ ecommerce-network ]
 
   auth-php:
-    build: ./auth-service
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
     container_name: auth-php
+    entrypoint: ["/var/www/html/.docker/entrypoint.sh"]
     user: "1000:1000"
     volumes:
       - ./auth-service:/var/www/html
@@ -147,7 +150,9 @@ services:
 
   # (volitelné) worker pro gateway, pokud bude mít joby
   api-worker:
-    build: ./api-gateway
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
     container_name: api-worker
     command: php artisan queue:work --tries=3 --timeout=90
     restart: unless-stopped
@@ -180,7 +185,9 @@ services:
     networks: [ecommerce-network]
 
   order-php:
-    build: ./order-service
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
     container_name: order-php
     user: "1000:1000"
     volumes:
@@ -204,7 +211,9 @@ services:
     networks: [ecommerce-network]
 
   order-worker:
-    build: ./order-service
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
     container_name: order-worker
     entrypoint: ["/var/www/html/.docker/worker-entrypoint.sh"]
     restart: unless-stopped
@@ -242,7 +251,9 @@ services:
     networks: [ecommerce-network]
 
   product-php:
-    build: ./product-service
+    build:
+      context: .
+      dockerfile: product-service/Dockerfile
     container_name: product-php
     user: "1000:1000"
     volumes:
@@ -266,7 +277,9 @@ services:
     networks: [ecommerce-network]
 
   product-worker:
-    build: ./product-service
+    build:
+      context: .
+      dockerfile: product-service/Dockerfile
     container_name: product-worker
     command: php artisan queue:work --tries=3 --timeout=90
     restart: unless-stopped

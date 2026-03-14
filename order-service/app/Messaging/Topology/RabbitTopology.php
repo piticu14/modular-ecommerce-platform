@@ -1,5 +1,6 @@
 <?php
 
+    namespace App\Messaging\Topology;
 
     use Illuminate\Support\Facades\Config;
     use PhpAmqpLib\Connection\AMQPStreamConnection;

@@ -1,6 +1,6 @@
 <?php
 
-    namespace app\Messaging\Consumers;
+    namespace App\Messaging\Consumers;
 
     use App\Models\Order;
     use App\Models\ProcessedEvent;

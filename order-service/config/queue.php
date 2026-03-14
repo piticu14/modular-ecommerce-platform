@@ -89,13 +89,10 @@ return [
             'queue' => env('RABBITMQ_QUEUE', 'order-service'),
 
             'options' => [
-
                 'queue' => [
-                    'declare' => false,
-                    'job' => \App\Queue\Jobs\ProcessRabbitMQMessageJob::class,
+                    'job' => \App\Jobs\ProcessRabbitMQMessageJob::class,
                 ],
-
-            ],
+            ]
         ],
 
         'deferred' => [

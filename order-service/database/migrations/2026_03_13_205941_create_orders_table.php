@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->uuid()->unique();
 
-            $table->unsignedBigInteger('user_id')->nullable()->index();
+            $table->unsignedBigInteger('user_id')->nullable();
 
-            $table->string('status', 32)->default('PENDING')->index();
+            $table->string('status', 32)->default('PENDING');
             $table->string('currency', 3)->default('CZK');
 
             $table->unsignedBigInteger('subtotal')->default(0);

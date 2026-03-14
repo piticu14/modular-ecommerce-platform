@@ -1,6 +1,7 @@
 <?php
 
     namespace app\Messaging\Publishers;
+
     use Queue;
 
     class RabbitPublisher

@@ -23,4 +23,14 @@ RUN apt-get update && apt-get install -y \
 # composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# entrypoint
+COPY docker/wait-for.sh /usr/local/bin/wait-for
+RUN chmod +x /usr/local/bin/wait-for
+
+COPY order-service/.docker/entrypoint.sh /usr/local/bin/entrypoint
+RUN chmod +x /usr/local/bin/entrypoint
+
+
 WORKDIR /var/www/html
+
+ENTRYPOINT ["entrypoint"]
