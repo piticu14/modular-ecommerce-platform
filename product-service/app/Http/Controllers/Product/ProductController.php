@@ -6,12 +6,15 @@
     use App\Http\Requests\Product\StoreProductRequest;
     use App\Http\Resources\Product\ProductResource;
     use App\Product\Domain\Enums\ProductStatus;
+    use App\Product\Domain\Exceptions\ProductAlreadyArchivedException;
     use App\Product\Domain\Models\Product;
+    use Illuminate\Http\JsonResponse;
     use Illuminate\Http\Request;
+    use Illuminate\Http\Resources\Json\ResourceCollection;
 
     class ProductController extends Controller
     {
-        public function index(Request $request)
+        public function index(Request $request): ResourceCollection
         {
             $ids = array_filter(explode(',', $request->query('ids', '')));
 
@@ -23,12 +26,12 @@
             return ProductResource::collection($products);
         }
 
-        public function show(Product $product)
+        public function show(Product $product): ProductResource
         {
             return new ProductResource($product);
         }
 
-        public function store(StoreProductRequest $request)
+        public function store(StoreProductRequest $request): JsonResponse
         {
 
             $product = Product::create([
@@ -43,18 +46,21 @@
                 ->setStatusCode(201);
         }
 
-        public function destroy(Product $product)
+        public function destroy(Product $product): JsonResponse
         {
-            if ($product->status === ProductStatus::ARCHIVED) {
+
+            try {
+
+                $product->archive();
+
+            } catch (ProductAlreadyArchivedException $e) {
+
                 return response()->json([
-                    'message' => 'Product already archived.'
+                    'message' => $e->getMessage()
                 ], 409);
             }
 
-            $product->update([
-                'status' => ProductStatus::ARCHIVED,
-            ]);
 
-            return response()->noContent();
+            return response()->json([], 204);
         }
     }

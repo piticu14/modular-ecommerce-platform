@@ -3,6 +3,7 @@
     namespace App\Product\Domain\Models;
 
     use App\Product\Domain\Enums\ProductStatus;
+    use App\Product\Domain\Exceptions\ProductAlreadyArchivedException;
     use App\Stock\Domain\Models\StockReservation;
     use Illuminate\Database\Eloquent\Model;
     use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -30,5 +31,17 @@
         public function getStockAvailableAttribute(): int
         {
             return max(0, $this->stock_on_hand - $this->stock_reserved);
+        }
+
+        public function archive(): void
+        {
+
+            if ($this->status->isArchived()) {
+                throw new ProductAlreadyArchivedException();
+            }
+
+            $this->update([
+                'status' => ProductStatus::ARCHIVED
+            ]);
         }
     }

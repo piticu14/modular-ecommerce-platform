@@ -23,12 +23,7 @@
             return $this === self::ARCHIVED;
         }
 
-        public function canBeReserved(): bool
-        {
-            return $this === self::ACTIVE;
-        }
-
-        public function canBeDeleted(): bool
+        public function isFinal(): bool
         {
             return $this === self::ARCHIVED;
         }

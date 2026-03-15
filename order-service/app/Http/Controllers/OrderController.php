@@ -6,15 +6,28 @@
     use App\Http\Resources\OrderResource;
     use App\Order\Application\Actions\CreateOrderAction;
     use App\Order\Application\Exceptions\OrderCreationFailedException;
+    use App\Order\Domain\Enums\OrderStatus;
+    use App\Order\Domain\Exceptions\OrderAlreadyFinalException;
+    use App\Order\Domain\Models\Order;
     use App\Support\RequestContext;
     use Illuminate\Http\Client\ConnectionException;
     use Illuminate\Http\Client\RequestException;
     use Illuminate\Http\JsonResponse;
-    use Order;
+    use Illuminate\Http\Resources\Json\ResourceCollection;
     use Throwable;
 
     class OrderController extends Controller
     {
+
+        public function index(): ResourceCollection
+        {
+
+            $orders = Order::query()
+                ->with('items')
+                ->get();
+
+            return OrderResource::collection($orders);
+        }
 
         /**
          * @throws RequestException
@@ -33,7 +46,7 @@
                     userId: RequestContext::userId(),
                 );
 
-            } catch (OrderCreationFailedException $e) {
+            } catch (OrderCreationFailedException) {
 
                 return response()->json([
                     'message' => 'Order could not be created'
@@ -41,17 +54,32 @@
 
             }
 
-            return response()->json([
-                'data' => new OrderResource($order)
-            ], 201);
+            return (new OrderResource($order))
+                ->response()
+                ->setStatusCode(201);
         }
 
-        public function show(Order $order): JsonResponse
+        public function show(Order $order): OrderResource
         {
             $order->load('items');
 
-            return response()->json([
-                'data' => new OrderResource($order)
-            ]);
+            return new OrderResource($order);
+        }
+
+        public function destroy(Order $order): JsonResponse
+        {
+
+            try {
+
+                $order->cancel();
+
+            } catch (OrderAlreadyFinalException $e) {
+
+                return response()->json([
+                    'message' => $e->getMessage()
+                ], 409);
+            }
+
+            return response()->json([], 204);
         }
     }
