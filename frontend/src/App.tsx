@@ -108,6 +108,10 @@ function App() {
                 </PrivateRoute>
               }
           >
+            <Route path="/" element={<ProductsPage />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/products/create" element={<CreateProductPage />} />
+              <Route path="/products/:id" element={<ProductDetailPage />} />
 
       <div className="ticks"></div>
       <section id="spacer"></section>
