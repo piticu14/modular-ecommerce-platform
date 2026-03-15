@@ -26,6 +26,17 @@
             return ProductResource::collection($products);
         }
 
+        public function indexByUuid(Request $request): ResourceCollection
+        {
+            $uuids = array_filter(explode(',', $request->query('uuids', '')));
+
+            $products = Product::query()
+                ->when($uuids, fn ($q) => $q->whereIn('uuid', $uuids))
+                ->get();
+
+            return ProductResource::collection($products);
+        }
+
         public function show(Product $product): ProductResource
         {
             return new ProductResource($product);

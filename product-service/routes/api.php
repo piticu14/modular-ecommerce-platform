@@ -4,6 +4,7 @@
     use App\Http\Controllers\Stock\StockReservationController;
 
     Route::middleware(['internal.signature', 'user.context'])->group(function () {
+        Route::get('/products/by-uuid', [ProductController::class, 'indexByUuid']);
         Route::apiResource('products', ProductController::class)
             ->only([
                 'index',

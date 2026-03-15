@@ -44,4 +44,9 @@
                 'status' => ProductStatus::ARCHIVED
             ]);
         }
+
+        public function getRouteKeyName(): string
+        {
+            return 'uuid';
+        }
     }

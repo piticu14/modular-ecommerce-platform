@@ -23,10 +23,6 @@
             return $this === self::ARCHIVED;
         }
 
-        public function isFinal(): bool
-        {
-            return $this === self::ARCHIVED;
-        }
 
         public static function activeStatuses(): array
         {

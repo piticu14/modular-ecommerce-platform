@@ -15,6 +15,7 @@
         {
             return [
                 'id' => $this->id,
+                'uuid' => $this->uuid,
                 'name' => $this->name,
                 'price' => $this->price,
                 'currency' => $this->currency,
