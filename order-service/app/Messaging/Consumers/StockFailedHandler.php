@@ -3,9 +3,9 @@
     namespace App\Messaging\Consumers;
 
     use App\Messaging\Infrastructure\Models\ProcessedEvent;
+    use App\Order\Domain\Models\Order;
     use Illuminate\Support\Facades\DB;
     use Illuminate\Support\Facades\Log;
-    use Order;
 
     class StockFailedHandler
     {

@@ -1,5 +1,6 @@
 <?php
 
+    namespace App\Order\Domain\Models;
 
     use Illuminate\Database\Eloquent\Model;
     use Illuminate\Database\Eloquent\Relations\HasMany;

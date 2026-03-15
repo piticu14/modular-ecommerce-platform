@@ -1,20 +1,20 @@
 <?php
 
-    namespace Actions;
+    namespace App\Order\Application\Actions;
 
+    use App\Messaging\DTO\OrderCreatedPayload;
     use App\Messaging\Infrastructure\Models\OutboxEvent;
-    use App\Messaging\Payloads\OrderCreatedPayload;
+    use App\Order\Application\DTO\CreateOrderItemData;
+    use App\Order\Application\DTO\ProductSnapshot;
     use App\Order\Application\Exceptions\OrderCreationFailedException;
+    use App\Order\Domain\Models\Order;
+    use App\Order\Infrastructure\Clients\ProductServiceClient;
+    use App\Order\Infrastructure\Exceptions\ProductServiceUnavailableException;
     use App\Support\RequestContext;
-    use Dto\CreateOrderItemData;
-    use Dto\ProductSnapshot;
-    use Exceptions\ProductServiceUnavailableException;
     use Illuminate\Http\Client\ConnectionException;
     use Illuminate\Http\Client\RequestException;
     use Illuminate\Support\Facades\DB;
     use Illuminate\Support\Str;
-    use Order;
-    use ProductServiceClient;
 
     readonly class CreateOrderAction
     {

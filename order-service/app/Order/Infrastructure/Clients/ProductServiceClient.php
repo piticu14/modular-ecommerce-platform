@@ -1,11 +1,12 @@
 <?php
 
+    namespace App\Order\Infrastructure\Clients;
 
+    use App\Order\Application\DTO\ProductSnapshot;
+    use App\Order\Infrastructure\Exceptions\InvalidProductServiceResponseException;
+    use App\Order\Infrastructure\Exceptions\ProductNotFoundException;
+    use App\Order\Infrastructure\Exceptions\ProductServiceUnavailableException;
     use App\Support\InternalHttp;
-    use Dto\ProductSnapshot;
-    use Exceptions\InvalidProductServiceResponseException;
-    use Exceptions\ProductNotFoundException;
-    use Exceptions\ProductServiceUnavailableException;
     use Illuminate\Http\Client\ConnectionException;
     use Illuminate\Http\Client\RequestException;
 

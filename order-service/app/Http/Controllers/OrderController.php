@@ -2,9 +2,9 @@
 
     namespace App\Http\Controllers;
 
-    use Actions\CreateOrderAction;
     use App\Http\Requests\StoreOrderRequest;
     use App\Http\Resources\OrderResource;
+    use App\Order\Application\Actions\CreateOrderAction;
     use App\Order\Application\Exceptions\OrderCreationFailedException;
     use App\Support\RequestContext;
     use Illuminate\Http\Client\ConnectionException;

@@ -1,27 +1,27 @@
 <?php
 
-namespace Dto;
+    namespace App\Order\Application\DTO;
 
-final readonly class ProductSnapshot
-{
-    public function __construct(
-        public int $id,
-        public string $name,
-        public string $price,
-        public string $currency,
-    ) {
-    }
-
-    /**
-     * @param array{id:int,name:string,price:string|int|float,currency:string} $data
-     */
-    public static function fromArray(array $data): self
+    final readonly class ProductSnapshot
     {
-        return new self(
-            id: (int) $data['id'],
-            name: (string) $data['name'],
-            price: (string) $data['price'],
-            currency: (string) $data['currency'],
-        );
+        public function __construct(
+            public int $id,
+            public string $name,
+            public string $price,
+            public string $currency,
+        ) {
+        }
+
+        /**
+         * @param array{id:int,name:string,price:string|int|float,currency:string} $data
+         */
+        public static function fromArray(array $data): self
+        {
+            return new self(
+                id: (int) $data['id'],
+                name: (string) $data['name'],
+                price: (string) $data['price'],
+                currency: (string) $data['currency'],
+            );
+        }
     }
-}

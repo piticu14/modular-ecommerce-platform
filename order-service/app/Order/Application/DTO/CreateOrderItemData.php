@@ -1,7 +1,6 @@
 <?php
 
-    namespace Dto;
-
+    namespace App\Order\Application\DTO;
     final readonly class CreateOrderItemData
     {
         public function __construct(

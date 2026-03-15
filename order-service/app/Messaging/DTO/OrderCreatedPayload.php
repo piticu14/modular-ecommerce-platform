@@ -1,8 +1,8 @@
 <?php
-    namespace App\Messaging\Payloads;
+    namespace App\Messaging\DTO;
 
+    use App\Order\Domain\Models\Order;
     use Carbon\CarbonInterface;
-    use Order;
 
     class OrderCreatedPayload extends EventPayload
     {
