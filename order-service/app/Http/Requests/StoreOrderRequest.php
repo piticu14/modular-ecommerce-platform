@@ -11,7 +11,7 @@
         {
             return [
                 'items' => ['required', 'array', 'min:1'],
-                'items.*.product_id' => ['required', 'integer', 'min:1'],
+                'items.*.product_uuid' => ['required', 'string', 'min:1'],
                 'items.*.quantity' => ['required', 'integer', 'min:1', 'max:100'],
             ];
         }

@@ -14,6 +14,7 @@
     use Illuminate\Http\Client\RequestException;
     use Illuminate\Http\JsonResponse;
     use Illuminate\Http\Resources\Json\ResourceCollection;
+    use Illuminate\Support\Facades\Log;
     use Throwable;
 
     class OrderController extends Controller
@@ -46,7 +47,9 @@
                     userId: RequestContext::userId(),
                 );
 
-            } catch (OrderCreationFailedException) {
+            } catch (OrderCreationFailedException $e) {
+
+                Log::error('Order creation failed', ['error' => $e->getMessage()]);
 
                 return response()->json([
                     'message' => 'Order could not be created'

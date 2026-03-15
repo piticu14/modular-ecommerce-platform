@@ -1,8 +1,9 @@
 <?php
 
-    namespace App\Models;
+    namespace App\Messaging\Infrastructure\Models;
 
     use Illuminate\Database\Eloquent\Model;
+
     class ProcessedEvent extends Model
     {
         public $timestamps = false;

@@ -9,6 +9,7 @@
     use App\Support\InternalHttp;
     use Illuminate\Http\Client\ConnectionException;
     use Illuminate\Http\Client\RequestException;
+    use Illuminate\Support\Facades\Log;
 
     class ProductServiceClient
     {
@@ -16,11 +17,11 @@
          * @param array<int,int> $ids
          * @return array<int,ProductSnapshot>
          */
-        public function getProducts(array $ids): array
+        public function getProductsByUuid(array $uuids): array
         {
-            $ids = array_values(array_unique(array_map('intval', $ids)));
+            $uuids = array_values(array_unique($uuids));
 
-            if ($ids === []) {
+            if ($uuids === []) {
                 return [];
             }
 
@@ -29,9 +30,9 @@
 
                 $response = InternalHttp::get(
                     config('services.product_service.base_url'),
-                    '/api/products',
+                    '/api/products/by-uuid',
                     [
-                        'ids' => implode(',', $ids),
+                        'uuids' => implode(',', $uuids),
                     ]
                 )->throw();
 
@@ -53,12 +54,12 @@
             $map = [];
 
             foreach ($products as $product) {
-                $map[(int) $product['id']] = ProductSnapshot::fromArray($product);
+                $map[$product['uuid']] = ProductSnapshot::fromArray($product);
             }
 
-            foreach ($ids as $id) {
-                if (!isset($map[$id])) {
-                    throw new ProductNotFoundException($id);
+            foreach ($uuids as $uuid) {
+                if (!isset($map[$uuid])) {
+                    throw new ProductNotFoundException($uuid);
                 }
             }
 

@@ -6,8 +6,8 @@
 
     final class ProductNotFoundException extends RuntimeException
     {
-        public function __construct(int $productId)
+        public function __construct(string $productUuid)
         {
-            parent::__construct("Product {$productId} was not found in ProductService.");
+            parent::__construct("Product {$productUuid} was not found in ProductService.");
         }
     }

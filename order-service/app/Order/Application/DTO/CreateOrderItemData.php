@@ -4,7 +4,7 @@
     final readonly class CreateOrderItemData
     {
         public function __construct(
-            public int $productId,
+            public string $productUuid,
             public int $quantity,
         ) {
         }
@@ -12,7 +12,7 @@
         public static function from(array $data): self
         {
             return new self(
-                productId: (int) $data['product_id'],
+                productUuid: $data['product_uuid'],
                 quantity: (int) $data['quantity'],
             );
         }

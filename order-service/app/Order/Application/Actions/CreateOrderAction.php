@@ -35,14 +35,15 @@
                 $items
             );
 
-
-            $productIds = array_map(
-                fn (CreateOrderItemData $item): int => $item->productId,
+            $productUuids = array_map(
+                fn (CreateOrderItemData $item): string => $item->productUuid,
                 $items
             );
 
+
+
             try {
-                $products = $this->productServiceClient->getProducts($productIds);
+                $products = $this->productServiceClient->getProductsByUuid($productUuids);
             } catch (ProductServiceUnavailableException $e) {
 
                 throw new OrderCreationFailedException(
@@ -66,7 +67,7 @@
 
                 foreach ($items as $item) {
 
-                    $product = $products[$item->productId] ?? null;
+                    $product = $products[$item->productUuid] ?? null;
 
                     $unitPrice = (int) $product->price;
 
@@ -126,7 +127,7 @@
             $currencies = [];
 
             foreach ($items as $item) {
-                $currencies[] = $products[$item->productId]->currency;
+                $currencies[] = $products[$item->productUuid]->currency;
             }
 
             $currencies = array_values(array_unique($currencies));
