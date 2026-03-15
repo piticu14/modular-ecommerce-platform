@@ -9,21 +9,13 @@
 
     class ProcessRabbitMQMessageJob extends BaseJob
     {
+        private const MAX_RETRIES = 5;
+
         public function fire()
         {
-            $payload = null;
+            $payload = $this->payload();
 
             try {
-
-                $payload = $this->payload();
-
-                Log::info('RabbitMQ message received', [
-                    'event_id' => $payload['event_id'] ?? null,
-                    'event_type' => $payload['event_type'] ?? null,
-                    'occurred_at' => $payload['occurred_at'] ?? null,
-                    'correlation_id' => $payload['correlation_id'] ?? null,
-                    'data' => $payload['data'] ?? null,
-                ]);
 
                 app(MessageDispatcher::class)->dispatch($payload);
 
@@ -31,15 +23,47 @@
 
             } catch (\Throwable $e) {
 
-                Log::error('RabbitMQ message failed', [
+                $attempt = $this->rabbitAttempts();
+
+                Log::warning('RabbitMQ retry attempt', [
+                    'attempt' => $attempt,
+                    'max_retries' => self::MAX_RETRIES,
                     'event_id' => $payload['event_id'] ?? null,
-                    'event_type' => $payload['event_type'] ?? null,
-                    'correlation_id' => $payload['correlation_id'] ?? null,
-                    'error' => $e->getMessage(),
+                    'error' => $e->getMessage()
                 ]);
 
-                throw $e;
+                if ($attempt >= self::MAX_RETRIES) {
+
+                    $this->getRabbitMQ()->pushRaw(
+                        $this->getRawBody(),
+                        'product-service.dlq'
+                    );
+
+                    $this->delete();
+
+                    Log::warning('Message moved to DLQ', [
+                        'attempts' => $attempt
+                    ]);
+
+                    return;
+                }
+
+                $this->getRabbitMQ()->reject($this);
+
             }
+        }
+
+        private function rabbitAttempts(): int
+        {
+            $headers = $this->getRabbitMQMessage()->get_properties()['application_headers'] ?? null;
+
+            if (!$headers) {
+                return 0;
+            }
+
+            $data = $headers->getNativeData();
+
+            return $data['x-death'][0]['count'] ?? 0;
         }
 
         public function getName(): string

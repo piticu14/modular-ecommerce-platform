@@ -87,7 +87,7 @@
 
                     OutboxEvent::create([
                         'id' => $eventId,
-                        'event_type' => 'OrderCrated',
+                        'event_type' => 'OrderCreated',
                         'routing_key' => 'order.created',
                         'payload' => OrderCreatedPayload::build(
                             order: $order,

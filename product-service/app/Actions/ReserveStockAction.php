@@ -15,6 +15,7 @@
     {
         public function handle(array $event): void
         {
+
             $data = $event['data'];
             $correlationId = $event['correlation_id'] ?? null;
 

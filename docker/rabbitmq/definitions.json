@@ -27,13 +27,18 @@
             "name": "ecommerce.events",
             "vhost": "/",
             "type": "topic",
-            "durable": true,
-            "auto_delete": false,
-            "internal": false
+            "durable": true
         },
 
         {
             "name": "ecommerce.retry",
+            "vhost": "/",
+            "type": "topic",
+            "durable": true
+        },
+
+        {
+            "name": "ecommerce.dlx",
             "vhost": "/",
             "type": "topic",
             "durable": true
@@ -117,10 +122,27 @@
             "destination_type": "queue",
             "routing_key": "stock.*"
         },
+
         {
             "source": "ecommerce.retry",
             "vhost": "/",
             "destination": "product-service.retry",
+            "destination_type": "queue",
+            "routing_key": "order.created"
+        },
+
+        {
+            "source": "ecommerce.dlx",
+            "vhost": "/",
+            "destination": "order-service.dlq",
+            "destination_type": "queue",
+            "routing_key": "stock.*"
+        },
+
+        {
+            "source": "ecommerce.dlx",
+            "vhost": "/",
+            "destination": "product-service.dlq",
             "destination_type": "queue",
             "routing_key": "order.created"
         }

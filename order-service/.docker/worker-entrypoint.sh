@@ -13,6 +13,6 @@ php artisan migrate --force --isolated || true
 
 php artisan queue:work rabbitmq \
   --sleep=1 \
-  --tries=3 \
+  --tries=1 \
   --timeout=90 \
   --max-jobs=1000

@@ -28,7 +28,6 @@
                 'event_type' => $event->event_type,
                 'occurred_at' => $event->occurred_at?->toISOString(),
                 'correlation_id' => $event->correlation_id,
-                'payload' => $event->payload,
             ]);
         }
     }

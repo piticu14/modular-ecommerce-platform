@@ -11,6 +11,7 @@
     {
         public function handle(array $event): void
         {
+
             $eventId = $event['event_id'];
             $orderId = $event['data']['order_id'];
 
@@ -29,7 +30,7 @@
                 'processed_at' => now(),
             ]);
 
-            DB::transaction(function () use ($orderId) {
+            DB::transaction(function () use ($orderId, $event) {
 
                 $order = Order::lockForUpdate()->findOrFail($orderId);
 
