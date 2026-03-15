@@ -18,11 +18,12 @@
                 'name' => $this->name,
                 'price' => $this->price,
                 'currency' => $this->currency,
+                'status' => $this->status,
                 'stock_on_hand' => $this->stock_on_hand,
                 'stock_reserved' => $this->stock_reserved,
-                'stock_available' => $this->stock_on_hand - $this->stock_reserved,
-                'created_at' => $this->created_at,
-                'updated_at' => $this->updated_at,
+                'stock_available' => $this->stock_available,
+                'created_at' => $this->created_at?->toISOString(),
+                'updated_at' => $this->updated_at?->toISOString(),
             ];
         }
     }

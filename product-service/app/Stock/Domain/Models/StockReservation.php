@@ -3,6 +3,7 @@
     namespace App\Stock\Domain\Models;
 
     use App\Product\Domain\Models\Product;
+    use App\Stock\Domain\Enums\StockReservationStatus;
     use Illuminate\Database\Eloquent\Model;
     use Illuminate\Database\Eloquent\Relations\BelongsTo;
     class StockReservation extends Model
@@ -22,6 +23,7 @@
             'order_item_id' => 'integer',
             'product_id' => 'integer',
             'quantity' => 'integer',
+            'status' => StockReservationStatus::class,
         ];
 
         public function product(): BelongsTo

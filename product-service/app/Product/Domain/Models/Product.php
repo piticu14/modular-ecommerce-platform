@@ -2,6 +2,7 @@
 
     namespace App\Product\Domain\Models;
 
+    use App\Product\Domain\Enums\ProductStatus;
     use App\Stock\Domain\Models\StockReservation;
     use Illuminate\Database\Eloquent\Model;
     use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,12 +15,11 @@
             'currency',
             'stock_on_hand',
             'stock_reserved',
+            'status',
         ];
 
         protected $casts = [
-            'price' => 'integer',
-            'stock_on_hand' => 'integer',
-            'stock_reserved' => 'integer',
+            'status' => ProductStatus::class,
         ];
 
         public function reservations(): HasMany
@@ -27,8 +27,8 @@
             return $this->hasMany(StockReservation::class);
         }
 
-        public function getAvailableStockAttribute(): int
+        public function getStockAvailableAttribute(): int
         {
-            return $this->stock_on_hand - $this->stock_reserved;
+            return max(0, $this->stock_on_hand - $this->stock_reserved);
         }
     }
