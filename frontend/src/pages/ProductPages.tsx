@@ -89,7 +89,7 @@ export default function ProductsPage() {
                                         color="error"
                                         disabled={deleteProduct.isPending}
                                         onClick={() =>
-                                            deleteProduct.mutate(product.uuid)
+                                            deleteProduct.mutate(product.id)
                                         }
                                     >
                                         Delete
