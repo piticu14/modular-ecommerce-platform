@@ -8,8 +8,8 @@ export const getProducts = async (): Promise<Product[]> => {
     return response.data.data;
 };
 
-export const getProduct = async (id: number): Promise<Product> => {
-    const response = await api.get<ApiResponse<Product>>(`/products/${id}`);
+export const getProduct = async (uuid: string): Promise<Product> => {
+    const response = await api.get<ApiResponse<Product>>(`/products/${uuid}`);
     return response.data.data;
 };
 
@@ -18,7 +18,7 @@ export const createProduct = async (payload: CreateProductPayload): Promise<Prod
     return response.data.data;
 };
 
-export const deleteProduct = async (id: number) => {
-    const { data } = await api.delete(`/products/${id}`);
+export const deleteProduct = async (uuid: string) => {
+    const { data } = await api.delete(`/products/${uuid}`);
     return data;
 };

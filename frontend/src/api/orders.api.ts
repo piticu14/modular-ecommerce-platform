@@ -7,8 +7,8 @@ export const getOrders = async (): Promise<Order[]> => {
     return response.data.data;
 };
 
-export const getOrder = async (id: number): Promise<Order> => {
-    const response = await api.get<ApiResponse<Order>> (`/orders/${id}`);
+export const getOrder = async (uuid: string): Promise<Order> => {
+    const response = await api.get<ApiResponse<Order>> (`/orders/${uuid}`);
     return response.data.data;
 };
 
@@ -17,7 +17,7 @@ export const createOrder = async (payload: CreateOrderPayload): Promise<Order> =
     return response.data.data;
 };
 
-export const deleteOrder = async (id: number) => {
-    const { data } = await api.delete(`/orders/${id}`);
+export const deleteOrder = async (uuid: string) => {
+    const { data } = await api.delete(`/orders/${uuid}`);
     return data;
 };

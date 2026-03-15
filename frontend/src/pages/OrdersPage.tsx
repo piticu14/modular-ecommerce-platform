@@ -2,23 +2,21 @@ import {
     Container,
     Typography,
     Table,
+    TableBody,
+    TableCell,
     TableHead,
     TableRow,
-    TableCell,
-    TableBody,
     Button,
-    Stack,
-    Box
+    Box, Stack
 } from "@mui/material";
 
 import { useNavigate } from "react-router-dom";
+import { useOrders } from "../hooks/queries/useOrders";
+import { useDeleteOrder } from "../hooks/mutations/useDeleteOrder";
 
-import { useProducts } from "../hooks/queries/useProducts";
-import { useDeleteProduct } from "../hooks/mutations/useDeleteProduct";
-
-export default function ProductsPage() {
-    const { data: products, isLoading } = useProducts();
-    const deleteProduct = useDeleteProduct();
+export default function OrdersPage() {
+    const { data: orders, isLoading } = useOrders();
+    const deleteOrder = useDeleteOrder();
     const navigate = useNavigate();
 
     if (isLoading) {
@@ -35,14 +33,14 @@ export default function ProductsPage() {
                 mb={2}
             >
                 <Typography variant="h4">
-                    Products
+                    Orders
                 </Typography>
 
                 <Button
                     variant="contained"
-                    onClick={() => navigate("/products/create")}
+                    onClick={() => navigate("/orders/create")}
                 >
-                    Create product
+                    Create order
                 </Button>
             </Box>
 
@@ -50,35 +48,31 @@ export default function ProductsPage() {
                 <TableHead>
                     <TableRow>
                         <TableCell>ID</TableCell>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Price</TableCell>
+                        <TableCell>User ID</TableCell>
+                        <TableCell>Status</TableCell>
                         <TableCell>Currency</TableCell>
-                        <TableCell>Stock</TableCell>
-                        <TableCell>Reserved</TableCell>
-                        <TableCell>Available</TableCell>
+                        <TableCell>Subtotal</TableCell>
+                        <TableCell>Total</TableCell>
                         <TableCell>Actions</TableCell>
                     </TableRow>
                 </TableHead>
 
                 <TableBody>
-                    {products?.map((product) => (
-                        <TableRow key={product.id}>
-                            <TableCell>{product.id}</TableCell>
-                            <TableCell>{product.name}</TableCell>
-                            <TableCell>{product.price}</TableCell>
-                            <TableCell>{product.currency}</TableCell>
-                            <TableCell>{product.stock_on_hand}</TableCell>
-                            <TableCell>{product.stock_reserved}</TableCell>
-                            <TableCell>{product.stock_available}</TableCell>
+                    {orders?.map((order) => (
+                        <TableRow key={order.id}>
+                            <TableCell>{order.id}</TableCell>
+                            <TableCell>{order.user_id}</TableCell>
+                            <TableCell>{order.status}</TableCell>
+                            <TableCell>{order.currency}</TableCell>
+                            <TableCell>{order.subtotal}</TableCell>
+                            <TableCell>{order.total}</TableCell>
 
                             <TableCell>
                                 <Stack direction="row" spacing={1}>
                                     <Button
                                         size="small"
                                         variant="outlined"
-                                        onClick={() =>
-                                            navigate(`/products/${product.id}`)
-                                        }
+                                        onClick={() => navigate(`/orders/${order.id}`)}
                                     >
                                         Detail
                                     </Button>
@@ -87,10 +81,8 @@ export default function ProductsPage() {
                                         size="small"
                                         variant="outlined"
                                         color="error"
-                                        disabled={deleteProduct.isPending}
-                                        onClick={() =>
-                                            deleteProduct.mutate(product.uuid)
-                                        }
+                                        disabled={deleteOrder.isPending}
+                                        onClick={() => deleteOrder.mutate(order.id)}
                                     >
                                         Delete
                                     </Button>

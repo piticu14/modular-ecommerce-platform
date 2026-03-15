@@ -13,18 +13,20 @@ import {
     Link
 } from "@mui/material";
 
-import { useParams, Link as RouterLink } from "react-router-dom";
+import {useParams, Link as RouterLink, Navigate} from "react-router-dom";
 
 import { useProduct } from "../hooks/queries/useProduct";
 import { useStockReservations } from "../hooks/queries/useStockReservations";
 
 export default function ProductDetailPage() {
-    const { id } = useParams();
+    const { uuid } = useParams();
 
-    const productId = Number(id);
+    if (!uuid) {
+        return <Navigate to="/products" />;
+    }
 
-    const { data: product, isLoading } = useProduct(productId);
-    const { data: reservations } = useStockReservations(productId);
+    const { data: product, isLoading } = useProduct(uuid);
+    const { data: reservations } = useStockReservations(uuid);
 
     if (isLoading) return <div>Loading...</div>;
     if (!product) return <div>Product not found</div>;

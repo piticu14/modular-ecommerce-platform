@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { getStockReservations } from "../../api/stockReservations.api";
 
-export const useStockReservations = (productId: number) => {
+export const useStockReservations = (uuid: string) => {
     return useQuery({
-        queryKey: ["stock-reservations", productId],
-        queryFn: () => getStockReservations(productId),
-        enabled: !!productId
+        queryKey: ["stock-reservations", uuid],
+        queryFn: () => getStockReservations(uuid),
+        enabled: !!uuid
     });
 };
