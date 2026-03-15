@@ -1,5 +1,5 @@
 <?php
-    namespace App\Messaging\Payloads;
+    namespace App\Messaging\DTO;
 
     use Carbon\CarbonInterface;
     use Illuminate\Support\Collection;

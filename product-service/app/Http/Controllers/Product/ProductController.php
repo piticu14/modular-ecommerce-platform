@@ -3,11 +3,11 @@
     namespace App\Http\Controllers\Product;
 
     use App\Http\Controllers\Controller;
+    use App\Http\Requests\Product\StoreProductRequest;
     use App\Http\Resources\Product\ProductResource;
     use App\Product\Domain\Enums\ProductStatus;
     use App\Product\Domain\Models\Product;
     use Illuminate\Http\Request;
-    use StoreProductRequest;
 
     class ProductController extends Controller
     {
@@ -30,7 +30,6 @@
 
         public function store(StoreProductRequest $request)
         {
-            $data = $request->validate();
 
             $product = Product::create([
                 ...$request->validated(),

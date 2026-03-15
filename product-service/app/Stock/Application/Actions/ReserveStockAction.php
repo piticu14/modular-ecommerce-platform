@@ -2,9 +2,9 @@
 
     namespace App\Stock\Application\Actions;
 
+    use App\Messaging\DTO\StockFailedPayload;
+    use App\Messaging\DTO\StockReservedPayload;
     use App\Messaging\Infrastructure\Models\OutboxEvent;
-    use App\Messaging\Payloads\StockFailedPayload;
-    use App\Messaging\Payloads\StockReservedPayload;
     use App\Product\Domain\Models\Product;
     use App\Stock\Domain\Models\StockReservation;
     use Illuminate\Support\Facades\DB;

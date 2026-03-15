@@ -3,7 +3,7 @@
 
     namespace App\Jobs;
 
-    use App\Messaging\Dispatching\MessageDispatcher;
+    use App\Messaging\Dispatcher\MessageDispatcher;
     use Illuminate\Support\Facades\Log;
     use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob as BaseJob;
 
