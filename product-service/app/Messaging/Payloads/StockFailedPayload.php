@@ -17,7 +17,7 @@
     {
         return self::envelope(
             $eventId,
-            'StockReserved',
+            'StockFailed',
             'product-service',
             $occurredAt,
             $correlationId,
