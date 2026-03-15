@@ -2,6 +2,7 @@
 
     namespace App\Http\Controllers;
 
+    use App\Http\Resources\ProductResource;
     use App\Models\Product;
     use Illuminate\Http\Request;
 
@@ -9,19 +10,17 @@
     {
         public function index(Request $request)
         {
-            $ids = explode(',', $request->query('ids', ''));
+            $ids = array_filter(explode(',', $request->query('ids', '')));
 
             $products = Product::query()
-                ->whereIn('id', $ids)
-                ->get([
-                    'id',
-                    'name',
-                    'price',
-                    'currency',
-                ]);
+                ->when($ids, fn ($q) => $q->whereIn('id', $ids))
+                ->get();
 
-            return response()->json([
-                'data' => $products,
-            ]);
+            return ProductResource::collection($products);
+        }
+
+        public function show(Product $product)
+        {
+            return new ProductResource($product);
         }
     }
