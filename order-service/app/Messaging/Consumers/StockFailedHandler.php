@@ -2,10 +2,10 @@
 
     namespace App\Messaging\Consumers;
 
-    use App\Models\Order;
-    use App\Models\ProcessedEvent;
+    use App\Messaging\Infrastructure\Models\ProcessedEvent;
     use Illuminate\Support\Facades\DB;
     use Illuminate\Support\Facades\Log;
+    use Order;
 
     class StockFailedHandler
     {

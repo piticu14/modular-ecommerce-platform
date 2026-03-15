@@ -2,8 +2,8 @@
 
     namespace App\Console\Commands;
 
+    use App\Messaging\Infrastructure\Models\OutboxEvent;
     use App\Messaging\Publishers\RabbitPublisher;
-    use App\Models\OutboxEvent;
     use Illuminate\Console\Command;
     use Illuminate\Support\Facades\DB;
 

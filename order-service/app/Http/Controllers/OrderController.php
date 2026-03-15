@@ -2,14 +2,15 @@
 
     namespace App\Http\Controllers;
 
-    use App\Actions\CreateOrderAction;
+    use Actions\CreateOrderAction;
     use App\Http\Requests\StoreOrderRequest;
     use App\Http\Resources\OrderResource;
-    use App\Models\Order;
+    use App\Order\Application\Exceptions\OrderCreationFailedException;
     use App\Support\RequestContext;
     use Illuminate\Http\Client\ConnectionException;
     use Illuminate\Http\Client\RequestException;
     use Illuminate\Http\JsonResponse;
+    use Order;
     use Throwable;
 
     class OrderController extends Controller
@@ -25,10 +26,20 @@
             CreateOrderAction $action
         ): JsonResponse {
 
-            $order = $action->execute(
-                items: $request->validated('items'),
-                userId: RequestContext::userId(),
-            );
+            try {
+
+                $order = $action->execute(
+                    items: $request->validated('items'),
+                    userId: RequestContext::userId(),
+                );
+
+            } catch (OrderCreationFailedException $e) {
+
+                return response()->json([
+                    'message' => 'Order could not be created'
+                ], 503);
+
+            }
 
             return response()->json([
                 'data' => new OrderResource($order)

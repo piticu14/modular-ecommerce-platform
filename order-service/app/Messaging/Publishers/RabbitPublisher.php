@@ -2,7 +2,7 @@
 
     namespace App\Messaging\Publishers;
 
-    use App\Models\OutboxEvent;
+    use App\Messaging\Infrastructure\Models\OutboxEvent;
     use Illuminate\Support\Facades\Log;
     use Queue;
 

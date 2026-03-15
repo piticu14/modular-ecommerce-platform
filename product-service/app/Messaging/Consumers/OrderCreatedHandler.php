@@ -1,7 +1,8 @@
 <?php
     namespace App\Messaging\Consumers;
 
-    use App\Actions\ReserveStockAction;
+
+    use App\Stock\Application\Actions\ReserveStockAction;
 
     class OrderCreatedHandler
     {

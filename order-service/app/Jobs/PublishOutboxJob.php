@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
+use App\Messaging\Infrastructure\Models\OutboxEvent;
 use App\Messaging\Publishers\RabbitPublisher;
-use App\Models\OutboxEvent;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
