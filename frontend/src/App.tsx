@@ -1,35 +1,24 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import Layout from "./components/Layout";
+
+import CreateProductPage from "./pages/CreateProductPage";
+import OrdersPage from "./pages/OrdersPage";
+import CreateOrderPage from "./pages/CreateOrderPage";
+import LoginPage from "./pages/LoginPage.tsx";
+import {PrivateRoute} from "./components/PrivateRoutes.tsx";
+import ProductsPage from "./pages/ProductPages.tsx";
+import RegisterPage from "./pages/RegisterPage.tsx";
+import ProductDetailPage from "./pages/ProductDetailPage.tsx";
+import OrderDetailPage from "./pages/OrderDetailPage.tsx";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
+      <BrowserRouter>
+        <Routes>
+          {/* public */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
 
       <section id="next-steps">
         <div id="docs">
@@ -111,11 +100,23 @@ function App() {
           </ul>
         </div>
       </section>
+          {/* protected layout */}
+          <Route
+              element={
+                <PrivateRoute>
+                  <Layout />
+                </PrivateRoute>
+              }
+          >
 
       <div className="ticks"></div>
       <section id="spacer"></section>
     </>
   )
+          </Route>
+        </Routes>
+      </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
