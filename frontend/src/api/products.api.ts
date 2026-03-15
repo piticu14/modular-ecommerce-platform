@@ -1,38 +1,21 @@
 import { api } from "./client";
+import type {ApiResponse} from "../types/ApiResponse.ts";
+import type {CreateProductPayload, Product} from "../types/Product.ts";
 
-export type Product = {
-    id: number;
-    name: string;
-    price: number;
-    currency: string;
-    stock_on_hand: number;
-    stock_reserved: number;
-    created_at: string;
-    updated_at: string;
-};
-
-export type CreateProductPayload = {
-    id: number;
-    name: string;
-    price: number;
-    currency: string;
-    stock_on_hand: number;
-    stock_reserved: number;
-};
 
 export const getProducts = async (): Promise<Product[]> => {
-    const { data } = await api.get("/products");
-    return data;
+    const response = await api.get<ApiResponse<Product[]>>("/products");
+    return response.data.data;
 };
 
 export const getProduct = async (id: number): Promise<Product> => {
-    const { data } = await api.get(`/products/${id}`);
-    return data;
+    const response = await api.get<ApiResponse<Product>>(`/products/${id}`);
+    return response.data.data;
 };
 
 export const createProduct = async (payload: CreateProductPayload): Promise<Product> => {
-    const { data } = await api.post("/orders", payload);
-    return data;
+    const response = await api.post<ApiResponse<Product>>("/products", payload);
+    return response.data.data;
 };
 
 export const deleteProduct = async (id: number) => {
