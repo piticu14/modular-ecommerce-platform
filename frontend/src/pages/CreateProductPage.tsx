@@ -2,33 +2,48 @@ import { Container, TextField, Button, Box, Typography } from "@mui/material";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
+import { useIntl } from "react-intl";
 
 import { useCreateProduct } from "../hooks/mutations/useCreateProduct";
-
-const validationSchema = Yup.object({
-    name: Yup.string().required("Name is required"),
-
-    price: Yup.number()
-        .required("Price is required")
-        .positive("Price must be positive"),
-
-    currency: Yup.string()
-        .required("Currency is required")
-        .length(3, "Currency must be 3 characters"),
-
-    stock_on_hand: Yup.number()
-        .min(0, "Stock cannot be negative")
-});
 
 export default function CreateProductPage() {
     const createProduct = useCreateProduct();
     const navigate = useNavigate();
+    const intl = useIntl();
+
+    const validationSchema = Yup.object({
+        name: Yup.string().required(
+            intl.formatMessage({ id: "validation.name_required" })
+        ),
+
+        price: Yup.number()
+            .required(
+                intl.formatMessage({ id: "validation.price_required" })
+            )
+            .positive(
+                intl.formatMessage({ id: "validation.price_positive" })
+            ),
+
+        currency: Yup.string()
+            .required(
+                intl.formatMessage({ id: "validation.currency_required" })
+            )
+            .length(
+                3,
+                intl.formatMessage({ id: "validation.currency_length" })
+            ),
+
+        stock_on_hand: Yup.number().min(
+            0,
+            intl.formatMessage({ id: "validation.stock_non_negative" })
+        ),
+    });
 
     return (
         <Container maxWidth="sm">
             <Box mt={10}>
                 <Typography variant="h4" gutterBottom>
-                    Create Product
+                    {intl.formatMessage({ id: "product.create.title" })}
                 </Typography>
 
                 <Formik
@@ -43,8 +58,9 @@ export default function CreateProductPage() {
                     onSubmit={async (values) => {
                         await createProduct.mutateAsync({
                             ...values,
-                            price: Math.round(values.price * 100)
+                            price: Math.round(values.price * 100),
                         });
+
                         navigate("/products");
                     }}
                 >
@@ -53,13 +69,15 @@ export default function CreateProductPage() {
                           errors,
                           touched,
                           handleChange,
-                          handleSubmit
+                          handleSubmit,
                       }) => (
                         <form onSubmit={handleSubmit}>
                             <TextField
                                 fullWidth
                                 margin="normal"
-                                label="Name"
+                                label={intl.formatMessage({
+                                    id: "product.create.name",
+                                })}
                                 name="name"
                                 value={values.name}
                                 onChange={handleChange}
@@ -70,7 +88,9 @@ export default function CreateProductPage() {
                             <TextField
                                 fullWidth
                                 margin="normal"
-                                label="Price"
+                                label={intl.formatMessage({
+                                    id: "product.create.price",
+                                })}
                                 name="price"
                                 type="number"
                                 value={values.price}
@@ -82,7 +102,9 @@ export default function CreateProductPage() {
                             <TextField
                                 fullWidth
                                 margin="normal"
-                                label="Currency"
+                                label={intl.formatMessage({
+                                    id: "product.create.currency",
+                                })}
                                 name="currency"
                                 value={values.currency}
                                 onChange={handleChange}
@@ -93,13 +115,20 @@ export default function CreateProductPage() {
                             <TextField
                                 fullWidth
                                 margin="normal"
-                                label="Stock on hand"
+                                label={intl.formatMessage({
+                                    id: "product.create.stock_on_hand",
+                                })}
                                 name="stock_on_hand"
                                 type="number"
                                 value={values.stock_on_hand}
                                 onChange={handleChange}
-                                error={touched.stock_on_hand && Boolean(errors.stock_on_hand)}
-                                helperText={touched.stock_on_hand && errors.stock_on_hand}
+                                error={
+                                    touched.stock_on_hand &&
+                                    Boolean(errors.stock_on_hand)
+                                }
+                                helperText={
+                                    touched.stock_on_hand && errors.stock_on_hand
+                                }
                             />
 
                             <Box mt={3}>
@@ -109,7 +138,9 @@ export default function CreateProductPage() {
                                     type="submit"
                                     disabled={createProduct.isPending}
                                 >
-                                    Create product
+                                    {intl.formatMessage({
+                                        id: "product.create.submit",
+                                    })}
                                 </Button>
                             </Box>
                         </form>

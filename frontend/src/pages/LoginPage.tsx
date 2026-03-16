@@ -1,23 +1,33 @@
-import { Container, TextField, Button, Box, Typography, Alert, Link } from "@mui/material";
+import {
+    Container,
+    TextField,
+    Button,
+    Box,
+    Typography,
+    Alert,
+    Link
+} from "@mui/material";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { useEffect } from "react";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useIntl } from "react-intl";
 
 import { useLogin } from "../hooks/mutations/useLogin";
-
-const validationSchema = Yup.object({
-    email: Yup.string()
-        .email("Invalid email")
-        .required("Email is required"),
-
-    password: Yup.string()
-        .required("Password is required")
-});
 
 export default function LoginPage() {
     const loginMutation = useLogin();
     const navigate = useNavigate();
+    const intl = useIntl();
+
+    const validationSchema = Yup.object({
+        email: Yup.string()
+            .email(intl.formatMessage({ id: "validation.email_invalid" }))
+            .required(intl.formatMessage({ id: "validation.email_required" })),
+
+        password: Yup.string()
+            .required(intl.formatMessage({ id: "validation.password_required" }))
+    });
 
     useEffect(() => {
         const token = localStorage.getItem("access_token");
@@ -25,13 +35,13 @@ export default function LoginPage() {
         if (token) {
             navigate("/products");
         }
-    }, []);
+    }, [navigate]);
 
     return (
         <Container maxWidth="sm">
             <Box mt={10}>
                 <Typography variant="h4" gutterBottom>
-                    Login
+                    {intl.formatMessage({ id: "login.title" })}
                 </Typography>
 
                 <Formik
@@ -61,7 +71,9 @@ export default function LoginPage() {
                             {!!loginMutation.error && (
                                 <Box mb={2}>
                                     <Alert severity="error">
-                                        Invalid email or password
+                                        {intl.formatMessage({
+                                            id: "login.invalid_credentials"
+                                        })}
                                     </Alert>
                                 </Box>
                             )}
@@ -69,7 +81,7 @@ export default function LoginPage() {
                             <TextField
                                 fullWidth
                                 margin="normal"
-                                label="Email"
+                                label={intl.formatMessage({ id: "login.email" })}
                                 name="email"
                                 value={values.email}
                                 onChange={handleChange}
@@ -80,7 +92,7 @@ export default function LoginPage() {
                             <TextField
                                 fullWidth
                                 margin="normal"
-                                label="Password"
+                                label={intl.formatMessage({ id: "login.password" })}
                                 type="password"
                                 name="password"
                                 value={values.password}
@@ -96,13 +108,15 @@ export default function LoginPage() {
                                     type="submit"
                                     disabled={loginMutation.isPending}
                                 >
-                                    Login
+                                    {intl.formatMessage({ id: "login.submit" })}
                                 </Button>
                             </Box>
 
                             <Box mt={2}>
                                 <Link component={RouterLink} to="/register">
-                                    Don't have an account? Register
+                                    {intl.formatMessage({
+                                        id: "login.register_link"
+                                    })}
                                 </Link>
                             </Box>
 

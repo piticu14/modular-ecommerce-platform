@@ -1,0 +1,116 @@
+{
+  "layout.title": "Microservices Demo",
+  "layout.products": "Products",
+  "layout.orders": "Orders",
+  "layout.logout": "Logout",
+  "layout.language": "Language",
+
+  "register.title": "Register",
+  "register.name": "Name",
+  "register.email": "Email",
+  "register.password": "Password",
+  "register.password_confirmation": "Confirm password",
+  "register.submit": "Register",
+  "register.login_link": "Already have an account? Login",
+
+  "validation.name_min": "Name must have at least 2 characters",
+  "validation.name_required": "Name is required",
+  "validation.email_invalid": "Invalid email",
+  "validation.email_required": "Email is required",
+  "validation.password_min": "Password must have at least 6 characters",
+  "validation.password_required": "Password is required",
+  "validation.password_match": "Passwords do not match",
+  "validation.password_confirmation_required": "Password confirmation is required",
+
+  "error.registration_failed": "Registration failed",
+
+  "order.create.title": "Create Order",
+  "order.create.product": "Product",
+  "order.create.quantity": "Quantity",
+  "order.create.add_item": "Add item",
+  "order.create.submit": "Create order",
+
+  "validation.product_required": "Product is required",
+  "validation.quantity_required": "Quantity is required",
+  "validation.quantity_positive": "Quantity must be positive",
+
+  "order.detail.title": "Order #{id}",
+  "order.detail.status": "Status",
+  "order.detail.created": "Created",
+  "order.detail.items": "Items",
+  "order.detail.product_uuid": "Product UUID",
+  "order.detail.quantity": "Quantity",
+
+  "order.loading": "Loading...",
+  "order.not_found": "Order not found",
+
+  "orders.title": "Orders",
+  "orders.create": "Create order",
+
+  "orders.table.id": "ID",
+  "orders.table.user_id": "User ID",
+  "orders.table.status": "Status",
+  "orders.table.currency": "Currency",
+  "orders.table.subtotal": "Subtotal",
+  "orders.table.total": "Total",
+  "orders.table.actions": "Actions",
+
+  "orders.action.detail": "Detail",
+  "orders.action.delete": "Delete",
+
+  "orders.loading": "Loading...",
+
+  "product.create.title": "Create Product",
+  "product.create.name": "Name",
+  "product.create.price": "Price",
+  "product.create.currency": "Currency",
+  "product.create.stock_on_hand": "Stock on hand",
+  "product.create.submit": "Create product",
+
+  "validation.price_required": "Price is required",
+  "validation.price_positive": "Price must be positive",
+  "validation.currency_required": "Currency is required",
+  "validation.currency_length": "Currency must be 3 characters",
+  "validation.stock_non_negative": "Stock cannot be negative",
+
+  "product.loading": "Loading...",
+  "product.not_found": "Product not found",
+
+  "product.stats.stock": "Stock",
+  "product.stats.reserved": "Reserved",
+  "product.stats.available": "Available",
+
+  "product.reservations.title": "Stock Reservations",
+
+  "product.reservations.order": "Order",
+  "product.reservations.quantity": "Quantity",
+  "product.reservations.status": "Status",
+  "product.reservations.created": "Created",
+  "product.reservations.updated": "Updated",
+
+  "products.title": "Products",
+  "products.create": "Create product",
+
+  "products.table.id": "ID",
+  "products.table.name": "Name",
+  "products.table.price": "Price",
+  "products.table.currency": "Currency",
+  "products.table.stock": "Stock",
+  "products.table.reserved": "Reserved",
+  "products.table.available": "Available",
+  "products.table.actions": "Actions",
+
+  "products.action.detail": "Detail",
+  "products.action.delete": "Delete",
+
+  "products.loading": "Loading...",
+
+  "login.title": "Login",
+  "login.email": "Email",
+  "login.password": "Password",
+  "login.submit": "Login",
+  "login.register_link": "Don't have an account? Register",
+  "login.invalid_credentials": "Invalid email or password"
+
+
+}

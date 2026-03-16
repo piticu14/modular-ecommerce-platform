@@ -7,10 +7,13 @@ import {
     TableHead,
     TableRow,
     Button,
-    Box, Stack
+    Box,
+    Stack
 } from "@mui/material";
 
 import { useNavigate } from "react-router-dom";
+import { useIntl } from "react-intl";
+
 import { useOrders } from "../hooks/queries/useOrders";
 import { useDeleteOrder } from "../hooks/mutations/useDeleteOrder";
 
@@ -18,9 +21,10 @@ export default function OrdersPage() {
     const { data: orders, isLoading } = useOrders();
     const deleteOrder = useDeleteOrder();
     const navigate = useNavigate();
+    const intl = useIntl();
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return <div>{intl.formatMessage({ id: "orders.loading" })}</div>;
     }
 
     return (
@@ -33,27 +37,47 @@ export default function OrdersPage() {
                 mb={2}
             >
                 <Typography variant="h4">
-                    Orders
+                    {intl.formatMessage({ id: "orders.title" })}
                 </Typography>
 
                 <Button
                     variant="contained"
                     onClick={() => navigate("/orders/create")}
                 >
-                    Create order
+                    {intl.formatMessage({ id: "orders.create" })}
                 </Button>
             </Box>
 
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell>ID</TableCell>
-                        <TableCell>User ID</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell>Currency</TableCell>
-                        <TableCell>Subtotal</TableCell>
-                        <TableCell>Total</TableCell>
-                        <TableCell>Actions</TableCell>
+                        <TableCell>
+                            {intl.formatMessage({ id: "orders.table.id" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "orders.table.user_id" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "orders.table.status" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "orders.table.currency" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "orders.table.subtotal" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "orders.table.total" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "orders.table.actions" })}
+                        </TableCell>
                     </TableRow>
                 </TableHead>
 
@@ -72,9 +96,13 @@ export default function OrdersPage() {
                                     <Button
                                         size="small"
                                         variant="outlined"
-                                        onClick={() => navigate(`/orders/${order.id}`)}
+                                        onClick={() =>
+                                            navigate(`/orders/${order.id}`)
+                                        }
                                     >
-                                        Detail
+                                        {intl.formatMessage({
+                                            id: "orders.action.detail"
+                                        })}
                                     </Button>
 
                                     <Button
@@ -84,7 +112,9 @@ export default function OrdersPage() {
                                         disabled={deleteOrder.isPending}
                                         onClick={() => deleteOrder.mutate(order.id)}
                                     >
-                                        Delete
+                                        {intl.formatMessage({
+                                            id: "orders.action.delete"
+                                        })}
                                     </Button>
                                 </Stack>
                             </TableCell>

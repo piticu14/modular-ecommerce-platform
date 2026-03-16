@@ -13,13 +13,15 @@ import {
     Link
 } from "@mui/material";
 
-import {useParams, Link as RouterLink, Navigate} from "react-router-dom";
+import { useParams, Link as RouterLink, Navigate } from "react-router-dom";
+import { useIntl } from "react-intl";
 
 import { useProduct } from "../hooks/queries/useProduct";
 import { useStockReservations } from "../hooks/queries/useStockReservations";
 
 export default function ProductDetailPage() {
     const { uuid } = useParams();
+    const intl = useIntl();
 
     if (!uuid) {
         return <Navigate to="/products" />;
@@ -28,8 +30,13 @@ export default function ProductDetailPage() {
     const { data: product, isLoading } = useProduct(uuid);
     const { data: reservations } = useStockReservations(uuid);
 
-    if (isLoading) return <div>Loading...</div>;
-    if (!product) return <div>Product not found</div>;
+    if (isLoading) {
+        return <div>{intl.formatMessage({ id: "product.loading" })}</div>;
+    }
+
+    if (!product) {
+        return <div>{intl.formatMessage({ id: "product.not_found" })}</div>;
+    }
 
     const statusColor = (status: string) => {
         switch (status) {
@@ -46,19 +53,17 @@ export default function ProductDetailPage() {
 
     return (
         <Container>
-
             <Typography variant="h4" mb={3}>
                 {product.name}
             </Typography>
 
-            {/* PRODUCT STATS */}
             <Grid container spacing={3} mb={4}>
 
                 <Grid size={{ xs: 12, md: 4 }}>
                     <Card>
                         <CardContent>
                             <Typography color="text.secondary">
-                                Stock
+                                {intl.formatMessage({ id: "product.stats.stock" })}
                             </Typography>
 
                             <Typography variant="h4">
@@ -72,7 +77,7 @@ export default function ProductDetailPage() {
                     <Card>
                         <CardContent>
                             <Typography color="text.secondary">
-                                Reserved
+                                {intl.formatMessage({ id: "product.stats.reserved" })}
                             </Typography>
 
                             <Typography variant="h4">
@@ -86,7 +91,7 @@ export default function ProductDetailPage() {
                     <Card>
                         <CardContent>
                             <Typography color="text.secondary">
-                                Available
+                                {intl.formatMessage({ id: "product.stats.available" })}
                             </Typography>
 
                             <Typography variant="h4">
@@ -99,17 +104,31 @@ export default function ProductDetailPage() {
             </Grid>
 
             <Typography variant="h6" mb={2}>
-                Stock Reservations
+                {intl.formatMessage({ id: "product.reservations.title" })}
             </Typography>
 
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell>Order</TableCell>
-                        <TableCell>Quantity</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell>Created</TableCell>
-                        <TableCell>Updated</TableCell>
+                        <TableCell>
+                            {intl.formatMessage({ id: "product.reservations.order" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "product.reservations.quantity" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "product.reservations.status" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "product.reservations.created" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "product.reservations.updated" })}
+                        </TableCell>
                     </TableRow>
                 </TableHead>
 

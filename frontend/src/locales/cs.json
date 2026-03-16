@@ -1,0 +1,114 @@
+{
+  "layout.title": "Microservices Demo",
+  "layout.products": "Produkty",
+  "layout.orders": "Objednávky",
+  "layout.logout": "Odhlásit se",
+  "layout.language": "Jazyk",
+
+  "register.title": "Registrace",
+  "register.name": "Jméno",
+  "register.email": "Email",
+  "register.password": "Heslo",
+  "register.password_confirmation": "Potvrzení hesla",
+  "register.submit": "Registrovat",
+  "register.login_link": "Už máte účet? Přihlaste se",
+
+  "validation.name_min": "Jméno musí mít alespoň 2 znaky",
+  "validation.name_required": "Jméno je povinné",
+  "validation.email_invalid": "Neplatný email",
+  "validation.email_required": "Email je povinný",
+  "validation.password_min": "Heslo musí mít alespoň 6 znaků",
+  "validation.password_required": "Heslo je povinné",
+  "validation.password_match": "Hesla se neshodují",
+  "validation.password_confirmation_required": "Potvrzení hesla je povinné",
+
+  "error.registration_failed": "Registrace se nezdařila",
+
+  "order.create.title": "Vytvořit objednávku",
+  "order.create.product": "Produkt",
+  "order.create.quantity": "Množství",
+  "order.create.add_item": "Přidat položku",
+  "order.create.submit": "Vytvořit objednávku",
+
+  "validation.product_required": "Produkt je povinný",
+  "validation.quantity_required": "Množství je povinné",
+  "validation.quantity_positive": "Množství musí být kladné",
+
+  "order.detail.title": "Objednávka #{id}",
+  "order.detail.status": "Stav",
+  "order.detail.created": "Vytvořeno",
+  "order.detail.items": "Položky",
+  "order.detail.product_uuid": "UUID produktu",
+  "order.detail.quantity": "Množství",
+
+  "order.loading": "Načítání...",
+  "order.not_found": "Objednávka nebyla nalezena",
+
+  "orders.title": "Objednávky",
+  "orders.create": "Vytvořit objednávku",
+
+  "orders.table.id": "ID",
+  "orders.table.user_id": "ID uživatele",
+  "orders.table.status": "Stav",
+  "orders.table.currency": "Měna",
+  "orders.table.subtotal": "Mezisoučet",
+  "orders.table.total": "Celkem",
+  "orders.table.actions": "Akce",
+
+  "orders.action.detail": "Detail",
+  "orders.action.delete": "Smazat",
+
+  "orders.loading": "Načítání...",
+
+  "product.create.title": "Vytvořit produkt",
+  "product.create.name": "Název",
+  "product.create.price": "Cena",
+  "product.create.currency": "Měna",
+  "product.create.stock_on_hand": "Skladové množství",
+  "product.create.submit": "Vytvořit produkt",
+
+  "validation.price_required": "Cena je povinná",
+  "validation.price_positive": "Cena musí být kladná",
+  "validation.currency_required": "Měna je povinná",
+  "validation.currency_length": "Měna musí mít 3 znaky",
+  "validation.stock_non_negative": "Sklad nemůže být záporný",
+
+  "login.title": "Přihlášení",
+  "login.email": "Email",
+  "login.password": "Heslo",
+  "login.submit": "Přihlásit se",
+  "login.register_link": "Nemáte účet? Zaregistrujte se",
+  "login.invalid_credentials": "Neplatný email nebo heslo",
+
+  "product.loading": "Načítání...",
+  "product.not_found": "Produkt nebyl nalezen",
+
+  "product.stats.stock": "Sklad",
+  "product.stats.reserved": "Rezervováno",
+  "product.stats.available": "Dostupné",
+
+  "product.reservations.title": "Rezervace skladu",
+
+  "product.reservations.order": "Objednávka",
+  "product.reservations.quantity": "Množství",
+  "product.reservations.status": "Stav",
+  "product.reservations.created": "Vytvořeno",
+  "product.reservations.updated": "Aktualizováno",
+
+  "products.title": "Produkty",
+  "products.create": "Vytvořit produkt",
+
+  "products.table.id": "ID",
+  "products.table.name": "Název",
+  "products.table.price": "Cena",
+  "products.table.currency": "Měna",
+  "products.table.stock": "Sklad",
+  "products.table.reserved": "Rezervováno",
+  "products.table.available": "Dostupné",
+  "products.table.actions": "Akce",
+
+  "products.action.detail": "Detail",
+  "products.action.delete": "Smazat",
+
+  "products.loading": "Načítání..."
+}

@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 
 import { useNavigate } from "react-router-dom";
+import { useIntl } from "react-intl";
 
 import { useProducts } from "../hooks/queries/useProducts";
 import { useDeleteProduct } from "../hooks/mutations/useDeleteProduct";
@@ -20,9 +21,10 @@ export default function ProductsPage() {
     const { data: products, isLoading } = useProducts();
     const deleteProduct = useDeleteProduct();
     const navigate = useNavigate();
+    const intl = useIntl();
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return <div>{intl.formatMessage({ id: "products.loading" })}</div>;
     }
 
     return (
@@ -35,28 +37,51 @@ export default function ProductsPage() {
                 mb={2}
             >
                 <Typography variant="h4">
-                    Products
+                    {intl.formatMessage({ id: "products.title" })}
                 </Typography>
 
                 <Button
                     variant="contained"
                     onClick={() => navigate("/products/create")}
                 >
-                    Create product
+                    {intl.formatMessage({ id: "products.create" })}
                 </Button>
             </Box>
 
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell>ID</TableCell>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Price</TableCell>
-                        <TableCell>Currency</TableCell>
-                        <TableCell>Stock</TableCell>
-                        <TableCell>Reserved</TableCell>
-                        <TableCell>Available</TableCell>
-                        <TableCell>Actions</TableCell>
+                        <TableCell>
+                            {intl.formatMessage({ id: "products.table.id" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "products.table.name" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "products.table.price" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "products.table.currency" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "products.table.stock" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "products.table.reserved" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "products.table.available" })}
+                        </TableCell>
+
+                        <TableCell>
+                            {intl.formatMessage({ id: "products.table.actions" })}
+                        </TableCell>
                     </TableRow>
                 </TableHead>
 
@@ -65,7 +90,7 @@ export default function ProductsPage() {
                         <TableRow key={product.uuid}>
                             <TableCell>{product.uuid}</TableCell>
                             <TableCell>{product.name}</TableCell>
-                            <TableCell>{product.price}</TableCell>
+                            <TableCell>{(product.price / 100).toFixed(2)}</TableCell>
                             <TableCell>{product.currency}</TableCell>
                             <TableCell>{product.stock_on_hand}</TableCell>
                             <TableCell>{product.stock_reserved}</TableCell>
@@ -80,7 +105,9 @@ export default function ProductsPage() {
                                             navigate(`/products/${product.uuid}`)
                                         }
                                     >
-                                        Detail
+                                        {intl.formatMessage({
+                                            id: "products.action.detail"
+                                        })}
                                     </Button>
 
                                     <Button
@@ -92,7 +119,9 @@ export default function ProductsPage() {
                                             deleteProduct.mutate(product.uuid)
                                         }
                                     >
-                                        Delete
+                                        {intl.formatMessage({
+                                            id: "products.action.delete"
+                                        })}
                                     </Button>
                                 </Stack>
                             </TableCell>

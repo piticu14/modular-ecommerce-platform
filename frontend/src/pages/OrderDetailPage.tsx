@@ -6,16 +6,19 @@ import {
     TableHead,
     TableRow,
     TableCell,
-    TableBody, Link
+    TableBody,
+    Link
 } from "@mui/material";
 
-import {Navigate, useParams} from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { useOrder } from "../hooks/queries/useOrder";
-import type {OrderItem} from "../types/Order.ts";
-import {Link as RouterLink} from "react-router";
+import type { OrderItem } from "../types/Order.ts";
+import { Link as RouterLink } from "react-router";
+import { useIntl } from "react-intl";
 
 export default function OrderDetailPage() {
     const { uuid } = useParams();
+    const intl = useIntl();
 
     if (!uuid) {
         return <Navigate to="/orders" />;
@@ -24,33 +27,53 @@ export default function OrderDetailPage() {
     const { data: order, isLoading } = useOrder(uuid);
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return (
+            <div>
+                {intl.formatMessage({ id: "order.loading" })}
+            </div>
+        );
     }
 
     if (!order) {
-        return <div>Order not found</div>;
+        return (
+            <div>
+                {intl.formatMessage({ id: "order.not_found" })}
+            </div>
+        );
     }
 
     return (
         <Container>
             <Typography variant="h4" mb={3}>
-                Order #{order.id}
+                {intl.formatMessage(
+                    { id: "order.detail.title" },
+                    { id: order.id }
+                )}
             </Typography>
 
             <Box mb={3}>
-                <Typography>Status: {order.status}</Typography>
-                <Typography>Created: {order.created_at}</Typography>
+                <Typography>
+                    {intl.formatMessage({ id: "order.detail.status" })}: {order.status}
+                </Typography>
+
+                <Typography>
+                    {intl.formatMessage({ id: "order.detail.created" })}: {order.created_at}
+                </Typography>
             </Box>
 
             <Typography variant="h6" mb={2}>
-                Items
+                {intl.formatMessage({ id: "order.detail.items" })}
             </Typography>
 
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell>Product UUID</TableCell>
-                        <TableCell>Quantity</TableCell>
+                        <TableCell>
+                            {intl.formatMessage({ id: "order.detail.product_uuid" })}
+                        </TableCell>
+                        <TableCell>
+                            {intl.formatMessage({ id: "order.detail.quantity" })}
+                        </TableCell>
                     </TableRow>
                 </TableHead>
 
@@ -65,6 +88,7 @@ export default function OrderDetailPage() {
                                     #{item.product_uuid}
                                 </Link>
                             </TableCell>
+
                             <TableCell>{item.quantity}</TableCell>
                         </TableRow>
                     ))}

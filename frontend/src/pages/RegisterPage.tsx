@@ -5,34 +5,45 @@ import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { Alert, Link } from "@mui/material";
 
 import { useRegister } from "../hooks/mutations/useRegister";
+import {useIntl} from "react-intl";
 
-const validationSchema = Yup.object({
-    name: Yup.string()
-        .min(2, "Name must have at least 2 characters")
-        .required("Name is required"),
-
-    email: Yup.string()
-        .email("Invalid email")
-        .required("Email is required"),
-
-    password: Yup.string()
-        .min(6, "Password must have at least 6 characters")
-        .required("Password is required"),
-
-    password_confirmation: Yup.string()
-        .oneOf([Yup.ref("password")], "Passwords do not match")
-        .required("Password confirmation is required"),
-});
 
 export default function RegisterPage() {
     const registerMutation = useRegister();
     const navigate = useNavigate();
 
+    const intl = useIntl();
+
+    const validationSchema = Yup.object({
+        name: Yup.string()
+            .min(2, intl.formatMessage({ id: "validation.name_min" }))
+            .required(intl.formatMessage({ id: "validation.name_required" })),
+
+        email: Yup.string()
+            .email(intl.formatMessage({ id: "validation.email_invalid" }))
+            .required(intl.formatMessage({ id: "validation.email_required" })),
+
+        password: Yup.string()
+            .min(6, intl.formatMessage({ id: "validation.password_min" }))
+            .required(intl.formatMessage({ id: "validation.password_required" })),
+
+        password_confirmation: Yup.string()
+            .oneOf(
+                [Yup.ref("password")],
+                intl.formatMessage({ id: "validation.password_match" })
+            )
+            .required(
+                intl.formatMessage({
+                    id: "validation.password_confirmation_required",
+                })
+            ),
+    });
+
     return (
         <Container maxWidth="sm">
             <Box mt={10}>
-                <Typography variant="h4" gutterBottom>
-                    Register
+                <Typography variant="h4">
+                    {intl.formatMessage({ id: "register.title" })}
                 </Typography>
 
                 <Formik
@@ -71,7 +82,7 @@ export default function RegisterPage() {
                             <TextField
                                 fullWidth
                                 margin="normal"
-                                label="Name"
+                                label={intl.formatMessage({ id: "register.name" })}
                                 name="name"
                                 value={values.name}
                                 onChange={handleChange}
@@ -82,7 +93,7 @@ export default function RegisterPage() {
                             <TextField
                                 fullWidth
                                 margin="normal"
-                                label="Email"
+                                label={intl.formatMessage({ id: "register.email" })}
                                 name="email"
                                 value={values.email}
                                 onChange={handleChange}
@@ -93,7 +104,7 @@ export default function RegisterPage() {
                             <TextField
                                 fullWidth
                                 margin="normal"
-                                label="Password"
+                                label={intl.formatMessage({ id: "register.password" })}
                                 type="password"
                                 name="password"
                                 value={values.password}
@@ -105,7 +116,7 @@ export default function RegisterPage() {
                             <TextField
                                 fullWidth
                                 margin="normal"
-                                label="Confirm password"
+                                label={intl.formatMessage({ id: "register.password_confirmation" })}
                                 type="password"
                                 name="password_confirmation"
                                 value={values.password_confirmation}
@@ -127,13 +138,13 @@ export default function RegisterPage() {
                                     type="submit"
                                     disabled={registerMutation.isPending}
                                 >
-                                    Register
+                                    {intl.formatMessage({ id: "register.submit" })}
                                 </Button>
                             </Box>
 
                             <Box mt={2}>
                                 <Link component={RouterLink} to="/login">
-                                    Already have an account? Login
+                                    {intl.formatMessage({ id: "register.login_link" })}
                                 </Link>
                             </Box>
                         </form>

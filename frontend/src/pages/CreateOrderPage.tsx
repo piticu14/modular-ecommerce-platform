@@ -11,35 +11,47 @@ import { Formik, FieldArray } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { Autocomplete } from "@mui/material";
+import { useIntl } from "react-intl";
 
 import { useCreateOrder } from "../hooks/mutations/useCreateOrder";
 import { useProducts } from "../hooks/queries/useProducts";
-
-const validationSchema = Yup.object({
-    items: Yup.array()
-        .of(
-            Yup.object({
-                product_uuid: Yup.string().required("Product is required"),
-                quantity: Yup.number()
-                    .required("Quantity is required")
-                    .positive("Quantity must be positive")
-            })
-        )
-        .min(1)
-});
 
 export default function CreateOrderPage() {
     const createOrder = useCreateOrder();
     const { data: products } = useProducts();
     const navigate = useNavigate();
+    const intl = useIntl();
 
     const productList = products ?? [];
+
+    const validationSchema = Yup.object({
+        items: Yup.array()
+            .of(
+                Yup.object({
+                    product_uuid: Yup.string().required(
+                        intl.formatMessage({ id: "validation.product_required" })
+                    ),
+                    quantity: Yup.number()
+                        .required(
+                            intl.formatMessage({
+                                id: "validation.quantity_required"
+                            })
+                        )
+                        .positive(
+                            intl.formatMessage({
+                                id: "validation.quantity_positive"
+                            })
+                        )
+                })
+            )
+            .min(1)
+    });
 
     return (
         <Container maxWidth="sm">
             <Box mt={10}>
                 <Typography variant="h4">
-                    Create Order
+                    {intl.formatMessage({ id: "order.create.title" })}
                 </Typography>
 
                 <Formik
@@ -64,7 +76,6 @@ export default function CreateOrderPage() {
                           handleSubmit
                       }) => (
                         <form onSubmit={handleSubmit}>
-                            {/*<pre>{JSON.stringify(errors, null, 2)}</pre>*/}
                             <FieldArray name="items">
                                 {({ push, remove }) => (
                                     <>
@@ -73,6 +84,7 @@ export default function CreateOrderPage() {
                                                 productList.find(
                                                     (p) => p.uuid === item.product_uuid
                                                 ) || null;
+
                                             return (
                                                 <Box
                                                     key={index}
@@ -95,12 +107,19 @@ export default function CreateOrderPage() {
                                                             )
                                                         }
                                                         renderInput={(params) => (
-                                                            <TextField {...params} label="Product" />
+                                                            <TextField
+                                                                {...params}
+                                                                label={intl.formatMessage({
+                                                                    id: "order.create.product"
+                                                                })}
+                                                            />
                                                         )}
                                                     />
 
                                                     <TextField
-                                                        label="Quantity"
+                                                        label={intl.formatMessage({
+                                                            id: "order.create.quantity"
+                                                        })}
                                                         type="number"
                                                         name={`items.${index}.quantity`}
                                                         value={item.quantity}
@@ -129,7 +148,9 @@ export default function CreateOrderPage() {
                                                     })
                                                 }
                                             >
-                                                Add item
+                                                {intl.formatMessage({
+                                                    id: "order.create.add_item"
+                                                })}
                                             </Button>
                                         </Box>
                                     </>
@@ -143,7 +164,9 @@ export default function CreateOrderPage() {
                                     type="submit"
                                     disabled={createOrder.isPending}
                                 >
-                                    Create order
+                                    {intl.formatMessage({
+                                        id: "order.create.submit"
+                                    })}
                                 </Button>
                             </Box>
                         </form>
