@@ -7,7 +7,6 @@
     use App\Messaging\Infrastructure\Models\OutboxEvent;
     use App\Product\Domain\Models\Product;
     use App\Stock\Domain\Models\StockReservation;
-    use Illuminate\Support\Facades\DB;
     use Illuminate\Support\Facades\Log;
     use Illuminate\Support\Str;
 
@@ -22,22 +21,20 @@
             $orderId = $data['order_id'];
             $items = collect($data['items']);
 
-            DB::transaction(function () use ($items, $orderId, $correlationId) {
 
-                $products = $this->lockProducts($items);
+            $products = $this->lockProducts($items);
 
-                if (!$this->allStockAvailable($products, $items)) {
+            if (!$this->allStockAvailable($products, $items)) {
 
-                    $this->storeFailedEvent($orderId, $items, $correlationId);
+                $this->storeFailedEvent($orderId, $items, $correlationId);
 
-                    return;
-                }
+                return;
+            }
 
-                $this->reserveStock($products, $items, $orderId, $correlationId);
+            $this->reserveStock($products, $items, $orderId, $correlationId);
 
-                $this->storeReservedEvent($orderId, $items, $correlationId);
+            $this->storeReservedEvent($orderId, $items, $correlationId);
 
-            });
         }
 
         private function lockProducts($items)

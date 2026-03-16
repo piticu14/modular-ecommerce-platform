@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('event_id')->primary();
             $table->string('consumer');
             $table->timestamp('processed_at');
+            $table->unique(['event_id', 'consumer']);
         });
     }
 
