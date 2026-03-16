@@ -11,25 +11,19 @@
     {
         public function handle(array $event): void
         {
-            $eventId = $event['event_id'];
-            $orderId = $event['data']['order_id'];
 
-            $exists = ProcessedEvent::where([
-                'event_id' => $eventId,
-                'consumer' => 'stock_reserved'
-            ])->exists();
+            DB::transaction(function () use ($event) {
 
-            if ($exists) {
-                return;
-            }
+                $eventId = $event['event_id'];
+                $orderId = $event['data']['order_id'];
 
-            ProcessedEvent::create([
-                'event_id' => $eventId,
-                'consumer' => 'stock_failed',
-                'processed_at' => now(),
-            ]);
+                if (ProcessedEvent::where([
+                    'event_id' => $eventId,
+                    'consumer' => 'stock_failed'
+                ])->lockForUpdate()->exists()) {
+                    return;
+                }
 
-            DB::transaction(function () use ($orderId) {
 
                 $order = Order::lockForUpdate()->findOrFail($orderId);
 
@@ -39,6 +33,12 @@
 
                 $order->update([
                     'status' => 'FAILED'
+                ]);
+
+                ProcessedEvent::create([
+                    'event_id' => $eventId,
+                    'consumer' => 'stock_failed',
+                    'processed_at' => now(),
                 ]);
 
                 Log::warning('StockFailed received', [
