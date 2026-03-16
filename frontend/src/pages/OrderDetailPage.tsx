@@ -6,12 +6,13 @@ import {
     TableHead,
     TableRow,
     TableCell,
-    TableBody
+    TableBody, Link
 } from "@mui/material";
 
 import {Navigate, useParams} from "react-router-dom";
 import { useOrder } from "../hooks/queries/useOrder";
 import type {OrderItem} from "../types/Order.ts";
+import {Link as RouterLink} from "react-router";
 
 export default function OrderDetailPage() {
     const { uuid } = useParams();
@@ -56,7 +57,14 @@ export default function OrderDetailPage() {
                 <TableBody>
                     {order.items.map((item: OrderItem, index: number) => (
                         <TableRow key={index}>
-                            <TableCell>{item.product_uuid}</TableCell>
+                            <TableCell>
+                                <Link
+                                    component={RouterLink}
+                                    to={`/products/${item.product_uuid}`}
+                                >
+                                    #{item.product_uuid}
+                                </Link>
+                            </TableCell>
                             <TableCell>{item.quantity}</TableCell>
                         </TableRow>
                     ))}
