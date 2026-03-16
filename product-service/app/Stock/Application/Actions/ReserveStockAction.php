@@ -54,18 +54,19 @@
 
         private function allStockAvailable($products, $items): bool
         {
+
             foreach ($items as $item) {
 
                 $product = $products->get($item['product_uuid']);
 
                 if (!$product) {
                     Log::error('Product missing during reservation', [
-                        'product_id' => $item['product_id']
+                        'product_uuid' => $item['product_uuid']
                     ]);
                     return false;
                 }
 
-                if ($product->available_stock < $item['quantity']) {
+                if ($product->stock_available < $item['quantity']) {
                     return false;
                 }
             }
@@ -85,7 +86,7 @@
                     'order_item_uuid' => $item['order_item_uuid'],
                 ], [
                     'order_uuid' => $orderUuid,
-                    'product_id' => $item['product_id'],
+                    'product_id' => $product->id,
                     'quantity' => $item['quantity'],
                     'status' => 'reserved',
                     'correlation_id' => $correlationId,

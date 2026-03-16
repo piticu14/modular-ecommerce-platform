@@ -15,6 +15,7 @@
 
         use HasFactory;
         protected $fillable = [
+            'uuid',
             'name',
             'price',
             'currency',
