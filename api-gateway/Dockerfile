@@ -21,7 +21,20 @@ RUN apt-get update && apt-get install -y \
 # composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# entrypoint
+COPY docker/*.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/*.sh
+
+ARG APP_USER=www-data
+ARG APP_GROUP=www-data
+
 WORKDIR /var/www/html
 
+COPY . /var/www/html
+
 # Set permissions for Laravel
-RUN chown -R www-data:www-data /var/www/html
+RUN mkdir -p storage/logs bootstrap/cache \
+    && chown -R ${APP_USER}:${APP_GROUP} storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
+ENTRYPOINT ["entrypoint.sh"]

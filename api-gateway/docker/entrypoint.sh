@@ -2,9 +2,9 @@
 
 set -e
 
-wait-for mysql-products 3306
+mkdir -p storage/logs bootstrap/cache
 
-php artisan migrate --force || true
+echo "Application ready."
 
 if [ "$#" -gt 0 ]; then
   exec "$@"

@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -e
+
+mkdir -p storage/logs bootstrap/cache
+
+echo "Waiting for dependencies..."
+
+wait-for.sh mysql-auth 3306
+
+echo "Application ready."
+
+if [ "$#" -gt 0 ]; then
+  exec "$@"
+fi
+
+exec php-fpm

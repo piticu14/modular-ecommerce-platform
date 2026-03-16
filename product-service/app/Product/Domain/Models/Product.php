@@ -5,11 +5,15 @@
     use App\Product\Domain\Enums\ProductStatus;
     use App\Product\Domain\Exceptions\ProductAlreadyArchivedException;
     use App\Stock\Domain\Models\StockReservation;
+    use Database\Factories\ProductFactory;
+    use Illuminate\Database\Eloquent\Factories\HasFactory;
     use Illuminate\Database\Eloquent\Model;
     use Illuminate\Database\Eloquent\Relations\HasMany;
 
     class Product extends Model
     {
+
+        use HasFactory;
         protected $fillable = [
             'name',
             'price',
@@ -48,5 +52,11 @@
         public function getRouteKeyName(): string
         {
             return 'uuid';
+        }
+
+
+        protected static function newFactory()
+        {
+            return ProductFactory::new();
         }
     }

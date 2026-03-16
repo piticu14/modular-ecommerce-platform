@@ -1,3 +1,15 @@
+.git
+.gitignore
+.idea
+.env
 node_modules
 vendor
-.git
+tests
+
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+coverage
+.phpunit.result.cache

@@ -74,29 +74,28 @@ services:
       - "8003:80" # debug z hosta
     volumes:
       - ./auth-service:/var/www/html
-      - ./auth-service/.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./auth-service/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - auth-php
     networks: [ ecommerce-network ]
 
   auth-php:
     build:
-      context: .
-      dockerfile: auth-service/Dockerfile
+      context: ./auth-service
+      args:
+        APP_USER: ${UID}
+        APP_GROUP: ${GID}
     container_name: auth-php
-    entrypoint: ["/var/www/html/.docker/entrypoint.sh"]
-    user: "1000:1000"
+    user: "${UID}:${GID}"
     volumes:
       - ./auth-service:/var/www/html
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
-
       DB_HOST: mysql-auth
       DB_DATABASE: auth
       DB_USERNAME: root
       DB_PASSWORD: root
-
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_EXCHANGE: ecommerce.events
@@ -116,27 +115,26 @@ services:
       - "8000:80"
     volumes:
       - ./api-gateway:/var/www/html
-      - ./api-gateway/.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./api-gateway/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - api-php
     networks: [ecommerce-network]
 
   api-php:
-    build: ./api-gateway
+    build:
+      context:  ./api-gateway
     container_name: api-php
-    user: "1000:1000"
+    user: "${UID}:${GID}"
     volumes:
       - ./api-gateway:/var/www/html
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
       APP_URL: http://localhost:8000
-
       # service discovery (gateway volá služby přes nginx kontejnery)
-      ORDER_SERVICE_URL: http://order-nginx
-      PRODUCT_SERVICE_URL: http://product-nginx
-      AUTH_SERVICE_URL: http://auth-nginx
-
+      ORDER_SERVICE_URL: ${ORDER_SERVICE_URL}
+      PRODUCT_SERVICE_URL: ${PRODUCT_SERVICE_URL}
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_EXCHANGE: ecommerce.events
@@ -151,10 +149,19 @@ services:
   # (volitelné) worker pro gateway, pokud bude mít joby
   api-worker:
     build:
-      context: .
-      dockerfile: api-gateway/Dockerfile
+      context: ./api-gateway
+      args:
+        APP_USER: ${UID}
+        APP_GROUP: ${GID}
     container_name: api-worker
-    command: php artisan queue:work --tries=3 --timeout=90
+    user: "${UID}:${GID}"
+    command: [
+      "php",
+      "artisan",
+      "queue:work",
+      "--tries=3",
+      "--timeout=90"
+    ]
     restart: unless-stopped
     volumes:
       - ./api-gateway:/var/www/html
@@ -179,28 +186,29 @@ services:
       - "8001:80" # debug z hosta
     volumes:
       - ./order-service:/var/www/html
-      - ./order-service/.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./order-service/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - order-php
     networks: [ecommerce-network]
 
   order-php:
     build:
-      context: .
-      dockerfile: order-service/Dockerfile
+      context: ./order-service
+      args:
+        APP_USER: ${UID}
+        APP_GROUP: ${GID}
     container_name: order-php
-    user: "1000:1000"
+    user: "${UID}:${GID}"
     volumes:
       - ./order-service:/var/www/html
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
-
+      RUN_MIGRATIONS: "true"
       DB_HOST: mysql-orders
       DB_DATABASE: orders
       DB_USERNAME: root
       DB_PASSWORD: root
-
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_EXCHANGE: ecommerce.events
@@ -212,15 +220,29 @@ services:
 
   order-worker:
     build:
-      context: .
-      dockerfile: order-service/Dockerfile
+      context: ./order-service
+      args:
+        APP_USER: ${UID}
+        APP_GROUP: ${GID}
     container_name: order-worker
-    entrypoint: ["/var/www/html/.docker/worker-entrypoint.sh"]
+    user: "${UID}:${GID}"
+    command:
+      [
+        "php",
+        "artisan",
+        "queue:work",
+        "rabbitmq",
+        "--sleep=1",
+        "--tries=1",
+        "--timeout=90",
+        "--max-jobs=1000"
+      ]
     restart: unless-stopped
     volumes:
       - ./order-service:/var/www/html
     environment:
       APP_ENV: local
+      RUN_MIGRATIONS: "false"
       DB_HOST: mysql-orders
       DB_DATABASE: orders
       DB_USERNAME: root
@@ -237,13 +259,26 @@ services:
 
   order-outbox-worker:
     build:
-      context: .
-      dockerfile: order-service/Dockerfile
+      context: ./order-service
+      args:
+        APP_USER: ${UID}
+        APP_GROUP: ${GID}
     container_name: order-outbox-worker
-    entrypoint: ["/var/www/html/.docker/outbox-worker-entrypoint.sh"]
+    user: "${UID}:${GID}"
+    command: [ "php", "artisan", "outbox:work"]
     restart: unless-stopped
     volumes:
       - ./order-service:/var/www/html
+    environment:
+      APP_ENV: local
+      RUN_MIGRATIONS: "false"
+      DB_HOST: mysql-orders
+      DB_DATABASE: orders
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_EXCHANGE: ecommerce.events
     depends_on:
       - mysql-orders
       - rabbitmq
@@ -259,28 +294,28 @@ services:
       - "8002:80" # debug z hosta
     volumes:
       - ./product-service:/var/www/html
-      - ./product-service/.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./product-service/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - product-php
     networks: [ecommerce-network]
 
   product-php:
     build:
-      context: .
-      dockerfile: product-service/Dockerfile
+      context: ./product-service
+      args:
+        APP_USER: ${UID}
+        APP_GROUP: ${GID}
     container_name: product-php
-    user: "1000:1000"
+    user: "${UID}:${GID}"
     volumes:
       - ./product-service:/var/www/html
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
-
       DB_HOST: mysql-products
       DB_DATABASE: products
       DB_USERNAME: root
       DB_PASSWORD: root
-
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_EXCHANGE: ecommerce.events
@@ -292,10 +327,23 @@ services:
 
   product-worker:
     build:
-      context: .
-      dockerfile: product-service/Dockerfile
+      context: ./product-service
+      args:
+        APP_USER: ${UID}
+        APP_GROUP: ${GID}
     container_name: product-worker
-    entrypoint: ["/var/www/html/.docker/worker-entrypoint.sh"]
+    user: "${UID}:${GID}"
+    command:
+      [
+        "php",
+        "artisan",
+        "queue:work",
+        "rabbitmq",
+        "--sleep=1",
+        "--tries=1",
+        "--timeout=90",
+        "--max-jobs=1000"
+      ]
     restart: unless-stopped
     volumes:
       - ./product-service:/var/www/html
@@ -317,10 +365,13 @@ services:
 
   product-outbox-worker:
     build:
-      context: .
-      dockerfile: product-service/Dockerfile
+      context: ./product-service
+      args:
+        APP_USER: ${UID}
+        APP_GROUP: ${GID}
     container_name: product-outbox-worker
-    entrypoint: ["/var/www/html/.docker/outbox-worker-entrypoint.sh"]
+    user: "${UID}:${GID}"
+    command: [ "php", "artisan", "outbox:work"]
     restart: unless-stopped
     volumes:
       - ./product-service:/var/www/html
@@ -335,13 +386,15 @@ services:
   frontend:
     build: ./frontend
     container_name: frontend
+    command: sh -c "npm install && npm run dev"
     ports:
-      - "3000:3000"
+      - "5173:5173"
     volumes:
       - ./frontend:/app
-      - /app/node_modules
     depends_on:
       - api-nginx
+#    profiles:
+#      - frontend
     networks: [ecommerce-network]
 
 networks:

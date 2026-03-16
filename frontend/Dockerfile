@@ -1,22 +1,13 @@
-FROM php:8.4-fpm
+FROM node:24-alpine
 
-# system deps
-RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
-    libzip-dev \
-    libonig-dev \
-    curl \
-  && docker-php-ext-install \
-    pdo_mysql \
-    mbstring \
-    bcmath \
-    zip \
-    opcache \
-    pcntl \
-  && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 
-# composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY package*.json ./
 
-WORKDIR /var/www/html
+RUN npm install
+
+COPY . .
+
+EXPOSE 5173
+
+CMD ["npm", "run", "dev"]

@@ -4,12 +4,15 @@
 
     use App\Order\Domain\Enums\OrderStatus;
     use App\Order\Domain\Exceptions\OrderAlreadyFinalException;
+    use Database\Factories\OrderFactory;
+    use Illuminate\Database\Eloquent\Factories\HasFactory;
     use Illuminate\Database\Eloquent\Model;
     use Illuminate\Database\Eloquent\Relations\HasMany;
     use Illuminate\Support\Str;
 
     class Order extends Model
     {
+        use HasFactory;
         protected $fillable = [
             'uuid',
             'user_id',
@@ -52,5 +55,10 @@
         public function getRouteKeyName(): string
         {
             return 'uuid';
+        }
+
+        protected static function newFactory()
+        {
+            return OrderFactory::new();
         }
     }
