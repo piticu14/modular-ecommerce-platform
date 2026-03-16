@@ -5,7 +5,6 @@
     final readonly class ProductSnapshot
     {
         public function __construct(
-            public int $id,
             public string $uuid,
             public string $name,
             public string $price,
@@ -23,7 +22,6 @@
         public static function fromArray(array $data): self
         {
             return new self(
-                id: (int) $data['id'],
                 uuid:  (string) $data['uuid'],
                 name: (string) $data['name'],
                 price: (string) $data['price'],

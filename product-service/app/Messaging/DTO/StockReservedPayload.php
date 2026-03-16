@@ -7,7 +7,7 @@
     class StockReservedPayload extends EventPayload
     {
         public static function build(
-            int $orderId,
+            string $orderUuid,
             string $eventId,
             CarbonInterface $occurredAt,
             string $correlationId,
@@ -21,7 +21,7 @@
             $occurredAt,
             $correlationId,
             [
-                'order_id' => $orderId,
+                'order_uuid' => $orderUuid,
                 'items' => $items->values()->all(),
             ]
         );

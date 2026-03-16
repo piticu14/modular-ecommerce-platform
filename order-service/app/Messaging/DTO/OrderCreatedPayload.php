@@ -19,10 +19,10 @@
                 $occurredAt,
                 $correlationId,
                 [
-                    'order_id' => $order->id,
+                    'order_uuid' => $order->uuid,
                     'items' => $order->items->map(fn ($item) => [
-                        'order_item_id' => $item->id,
-                        'product_id' => $item->product_id,
+                        'order_item_uuid' => $item->uuid,
+                        'product_uuid' => $item->product_uuid,
                         'quantity' => $item->quantity,
                     ])->values()->all(),
                     'total' => $order->total,

@@ -20,7 +20,7 @@
 
             DB::transaction(function () use ($event, $eventId) {
 
-                $orderId = $event['data']['order_id'];
+                $orderUuid = $event['data']['order_uuid'];
 
                 $exists = ProcessedEvent::where([
                     'event_id' => $eventId,
@@ -40,7 +40,7 @@
                 ]);
 
                 Log::info('OrderCreated received', [
-                    'order_id' => $orderId,
+                    'order_uuid' => $orderUuid,
                     'correlation_id' => $event['correlation_id'] ?? null,
                 ]);
             });

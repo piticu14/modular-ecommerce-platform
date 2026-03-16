@@ -25,6 +25,7 @@
 
             $orders = Order::query()
                 ->with('items')
+                ->orderByDesc('created_at')
                 ->get();
 
             return OrderResource::collection($orders);

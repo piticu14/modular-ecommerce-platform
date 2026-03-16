@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->unsignedBigInteger('order_id');
-            $table->unsignedBigInteger('order_item_id')->nullable();
+            $table->unsignedBigInteger('order_item_id');
 
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
 

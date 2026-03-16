@@ -6,7 +6,6 @@ namespace Database\Factories;
 use App\Order\Domain\Models\Order;
 use App\Order\Domain\Models\OrderItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 class OrderFactory extends Factory
 {
@@ -15,7 +14,7 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         return [
-            'uuid' => Str::uuid(),
+            'uuid' => fake()->uuid(),
             'user_id' => fake()->optional()->numberBetween(1, 10),
             'status' => fake()->randomElement(['PENDING', 'PAID', 'CANCELLED']),
             'currency' => 'CZK',
@@ -39,8 +38,9 @@ class OrderFactory extends Factory
                 $lineTotal = $price * $qty;
 
                 OrderItem::create([
+                    'uuid' => fake()->uuid(),
                     'order_id' => $order->id,
-                    'product_id' => fake()->numberBetween(1, 50),
+                    'product_uuid' => fake()->uuid(),
                     'product_name' => fake()->randomElement([
                             'iPhone',
                             'MacBook',

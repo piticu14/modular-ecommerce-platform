@@ -74,7 +74,8 @@
                     $lineTotal = $unitPrice * $item->quantity;
 
                     $order->items()->create([
-                        'product_id' => $product->id,
+                        'uuid' => (string) Str::uuid(),
+                        'product_uuid' => $product->uuid,
                         'product_name' => $product->name,
                         'unit_price' => $unitPrice,
                         'currency' => $product->currency,

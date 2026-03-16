@@ -11,7 +11,7 @@
     {
         public function handle(Request $request, Closure $next)
         {
-            $id = $request->header('X-Correlation-ID') ?? Str::uuid()->toString();
+            $id = $request->header('X-Correlation-ID') ?? (string) Str::uuid();
 
             $request->headers->set('X-Correlation-ID', $id);
 

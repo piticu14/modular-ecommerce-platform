@@ -16,7 +16,7 @@
                 'total' => $this->total,
                 'items' => $this->items->map(function ($item) {
                     return [
-                        'product_id' => $item->product_id,
+                        'product_uuid' => $item->product_uuid,
                         'product_name' => $item->product_name,
                         'price' => $item->price,
                         'currency' => $item->currency,

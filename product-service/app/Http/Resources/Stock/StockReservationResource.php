@@ -12,8 +12,8 @@
         {
             return [
                 'id' => $this->id,
-                'order_id' => $this->order_id,
-                'order_item_id' => $this->order_item_id,
+                'order_uuid' => $this->order_uuid,
+                'order_item_uuid' => $this->order_item_uuid,
                 'product_id' => $this->product_id,
                 'quantity' => $this->quantity,
                 'status' => $this->status,

@@ -14,7 +14,7 @@
         public function toArray(Request $request): array
         {
             return [
-                'id' => $this->uuid,
+                'uuid' => $this->uuid,
                 'name' => $this->name,
                 'price' => $this->price,
                 'currency' => $this->currency,

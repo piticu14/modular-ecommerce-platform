@@ -120,9 +120,9 @@ export default function ProductDetailPage() {
                             <TableCell>
                                 <Link
                                     component={RouterLink}
-                                    to={`/orders/${reservation.order_id}`}
+                                    to={`/orders/${reservation.order_uuid}`}
                                 >
-                                    #{reservation.order_id}
+                                    #{reservation.order_uuid}
                                 </Link>
                             </TableCell>
 

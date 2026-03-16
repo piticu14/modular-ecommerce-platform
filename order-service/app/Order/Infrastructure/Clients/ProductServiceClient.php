@@ -47,6 +47,8 @@
             /** @var array<int,array{id:int,name:string,price:string|int|float,currency:string}> $products */
             $products = $response->json('data', []);
 
+            Log::info('ProductService response', ['products' => $products]);
+
             if (!is_array($products)) {
                 throw new InvalidProductServiceResponseException('Missing or invalid data key.');
             }

@@ -21,6 +21,7 @@
             $products = Product::query()
                 ->where('status', ProductStatus::ACTIVE)
                 ->when($ids, fn ($q) => $q->whereIn('id', $ids))
+                ->orderBy('name')
                 ->get();
 
             return ProductResource::collection($products);

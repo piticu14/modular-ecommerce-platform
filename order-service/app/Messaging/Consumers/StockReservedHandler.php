@@ -13,7 +13,7 @@
 
             DB::transaction(function () use ($event) {
                 $eventId = $event['event_id'];
-                $orderId = $event['data']['order_id'];
+                $orderUuid = $event['data']['order_uuid'];
 
                 if (ProcessedEvent::where([
                     'event_id' => $eventId,
@@ -22,7 +22,9 @@
                     return;
                 }
 
-                $order = Order::lockForUpdate()->findOrFail($orderId);
+                $order = Order::where('uuid', $orderUuid)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
                 if ($order->status !== 'PENDING') {
                     return;
@@ -39,7 +41,7 @@
                 ]);
 
                 Log::info('StockReserved received', [
-                    'order_id' => $orderId,
+                    'order_uuid' => $orderUuid,
                     'correlation_id' => $event['correlation_id'] ?? null,
                 ]);
 

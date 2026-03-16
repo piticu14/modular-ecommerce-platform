@@ -1,7 +1,7 @@
 export type StockReservation = {
     id: number;
-    order_id: number;
-    order_item_id: number;
+    order_uuid: string;
+    order_item_uuid: string;
     product_id: number;
     quantity: number;
     status: string;

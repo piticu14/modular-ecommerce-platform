@@ -12,6 +12,7 @@ class ProductFactory extends Factory
     public function definition(): array
     {
         return [
+            'uuid' => fake()->uuid(),
             'name' => fake()->randomElement([
                     'iPhone',
                     'MacBook',

@@ -18,7 +18,7 @@
             $data = $event['data'];
             $correlationId = $event['correlation_id'] ?? null;
 
-            $orderId = $data['order_id'];
+            $orderUuid = $data['order_uuid'];
             $items = collect($data['items']);
 
 
@@ -26,37 +26,37 @@
 
             if (!$this->allStockAvailable($products, $items)) {
 
-                $this->storeFailedEvent($orderId, $items, $correlationId);
+                $this->storeFailedEvent($orderUuid, $items, $correlationId);
 
                 return;
             }
 
-            $this->reserveStock($products, $items, $orderId, $correlationId);
+            $this->reserveStock($products, $items, $orderUuid, $correlationId);
 
-            $this->storeReservedEvent($orderId, $items, $correlationId);
+            $this->storeReservedEvent($orderUuid, $items, $correlationId);
 
         }
 
         private function lockProducts($items)
         {
-            $productIds = $items
-                ->pluck('product_id')
+            $productUuids = $items
+                ->pluck('product_uuid')
                 ->unique()
                 ->sort()
                 ->values();
 
             return Product::query()
-                ->whereIn('id', $productIds)
+                ->whereIn('uuid', $productUuids)
                 ->lockForUpdate()
                 ->get()
-                ->keyBy('id');
+                ->keyBy('uuid');
         }
 
         private function allStockAvailable($products, $items): bool
         {
             foreach ($items as $item) {
 
-                $product = $products->get($item['product_id']);
+                $product = $products->get($item['product_uuid']);
 
                 if (!$product) {
                     Log::error('Product missing during reservation', [
@@ -73,18 +73,18 @@
             return true;
         }
 
-        private function reserveStock($products, $items, $orderId, $correlationId): void
+        private function reserveStock($products, $items, $orderUuid, $correlationId): void
         {
             foreach ($items as $item) {
 
-                $product = $products->get($item['product_id']);
+                $product = $products->get($item['product_uuid']);
 
                 $product->increment('stock_reserved', $item['quantity']);
 
                 StockReservation::firstOrCreate([
-                    'order_item_id' => $item['order_item_id'],
+                    'order_item_uuid' => $item['order_item_uuid'],
                 ], [
-                    'order_id' => $orderId,
+                    'order_uuid' => $orderUuid,
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
                     'status' => 'reserved',
@@ -93,7 +93,7 @@
             }
         }
 
-        private function storeReservedEvent($orderId, $items, $correlationId): void
+        private function storeReservedEvent($orderUuid, $items, $correlationId): void
         {
             $eventId = (string) Str::uuid();
             $occurredAt = now();
@@ -103,7 +103,7 @@
                 'event_type' => 'StockReserved',
                 'routing_key' => 'stock.reserved',
                 'payload' => StockReservedPayload::build(
-                    orderId: $orderId,
+                    orderUuid: $orderUuid,
                     eventId: $eventId,
                     occurredAt: $occurredAt,
                     correlationId: $correlationId,
@@ -114,13 +114,13 @@
             ]);
 
             Log::info('Stock reserved', [
-                'order_id' => $orderId,
+                'order_uuid' => $orderUuid,
                 'items' => $items,
                 'correlation_id' => $correlationId,
             ]);
         }
 
-        private function storeFailedEvent($orderId, $items, $correlationId): void
+        private function storeFailedEvent($orderUuid, $items, $correlationId): void
         {
             $eventId = (string) Str::uuid();
             $occurredAt = now();
@@ -130,7 +130,7 @@
                 'event_type' => 'StockFailed',
                 'routing_key' => 'stock.failed',
                 'payload' => StockFailedPayload::build(
-                    orderId: $orderId,
+                    orderUuid: $orderUuid,
                     eventId: $eventId,
                     occurredAt: $occurredAt,
                     correlationId: $correlationId,
@@ -141,7 +141,7 @@
             ]);
 
             Log::warning('Stock reservation failed', [
-                'order_id' => $orderId,
+                'order_uuid' => $orderUuid,
                 'items' => $items,
                 'correlation_id' => $correlationId,
             ]);
