@@ -62,8 +62,8 @@ export default function ProductsPage() {
 
                 <TableBody>
                     {products?.map((product) => (
-                        <TableRow key={product.id}>
-                            <TableCell>{product.id}</TableCell>
+                        <TableRow key={product.uuid}>
+                            <TableCell>{product.uuid}</TableCell>
                             <TableCell>{product.name}</TableCell>
                             <TableCell>{product.price}</TableCell>
                             <TableCell>{product.currency}</TableCell>
@@ -77,7 +77,7 @@ export default function ProductsPage() {
                                         size="small"
                                         variant="outlined"
                                         onClick={() =>
-                                            navigate(`/products/${product.id}`)
+                                            navigate(`/products/${product.uuid}`)
                                         }
                                     >
                                         Detail
@@ -89,7 +89,7 @@ export default function ProductsPage() {
                                         color="error"
                                         disabled={deleteProduct.isPending}
                                         onClick={() =>
-                                            deleteProduct.mutate(product.id)
+                                            deleteProduct.mutate(product.uuid)
                                         }
                                     >
                                         Delete

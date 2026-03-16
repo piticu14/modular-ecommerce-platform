@@ -11,14 +11,16 @@ import {
 
 import {Navigate, useParams} from "react-router-dom";
 import { useOrder } from "../hooks/queries/useOrder";
+import type {OrderItem} from "../types/Order.ts";
 
 export default function OrderDetailPage() {
     const { uuid } = useParams();
-    const { data: order, isLoading } = useOrder(uuid);
 
     if (!uuid) {
         return <Navigate to="/orders" />;
     }
+
+    const { data: order, isLoading } = useOrder(uuid);
 
     if (isLoading) {
         return <div>Loading...</div>;
@@ -46,15 +48,15 @@ export default function OrderDetailPage() {
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell>Product ID</TableCell>
+                        <TableCell>Product UUID</TableCell>
                         <TableCell>Quantity</TableCell>
                     </TableRow>
                 </TableHead>
 
                 <TableBody>
-                    {order.items.map((item: any, index: number) => (
+                    {order.items.map((item: OrderItem, index: number) => (
                         <TableRow key={index}>
-                            <TableCell>{item.product_id}</TableCell>
+                            <TableCell>{item.product_uuid}</TableCell>
                             <TableCell>{item.quantity}</TableCell>
                         </TableRow>
                     ))}
