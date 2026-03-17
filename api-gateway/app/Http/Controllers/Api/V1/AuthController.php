@@ -2,6 +2,13 @@
 
     namespace App\Http\Controllers\Api\V1;
 
+    use App\Http\Requests\Api\V1\Auth\LoginRequest;
+    use App\Http\Requests\Api\V1\Auth\RegisterRequest;
+    use App\Http\Resources\Api\V1\Auth\TokenResource;
+    use App\Http\Resources\Api\V1\Auth\UserResource;
+    use App\Http\Resources\Api\V1\Common\ErrorResource;
+    use Dedoc\Scramble\Attributes\Response as DedocResponse;
+    use Dedoc\Scramble\Attributes\Group;
     use Illuminate\Http\Request;
     use Symfony\Component\HttpFoundation\Response;
 
@@ -12,22 +19,16 @@
          *
          * Authenticates user and returns JWT token.
          *
-         * @group Authentication
+         * @unauthenticated
          *
-         * @bodyParam email string required User email. Example: user@example.com
-         * @bodyParam password string required User password. Example: secret123
-         *
-         * @response 200 {
-         *   "access_token": "jwt_token_here",
-         *   "token_type": "bearer",
-         *   "expires_in": 3600
-         * }
-         *
-         * @response 401 {
-         *   "error": "Unauthorized"
-         * }
-         */
-        public function login(Request $request): Response
+        */
+
+        #[DedocResponse(200, 'OK', type: TokenResource::class)]
+        #[DedocResponse(401, 'Unauthorized', type: ErrorResource::class)]
+        #[DedocResponse(422, 'Unprocessable Content', type: ErrorResource::class)]
+        #[DedocResponse(503, 'Service unavailable', type: ErrorResource::class)]
+        #[Group('Auth - Public')]
+        public function login(LoginRequest $request)
         {
             return $this->forwardToService($request, 'auth');
         }
@@ -37,26 +38,15 @@
          *
          * Registers a new user.
          *
-         * @group Authentication
+         * @unauthenticated
          *
-         * @bodyParam name string required Full name. Example: John Doe
-         * @bodyParam email string required User email. Example: user@example.com
-         * @bodyParam password string required Password (min 6 characters). Example: secret123
-         *
-         * @response 201 {
-         *   "message": "User created"
-         * }
-         *
-         * @response 422 {
-         *   "message": "The email has already been taken.",
-         *   "errors": {
-         *     "name": ["The name field is required."],
-         *     "email": ["The email has already been taken."],
-         *     "password": ["The password must be at least 6 characters."]
-         *   }
-         * }
          */
-        public function register(Request $request): Response
+
+        #[DedocResponse(201, 'Created', type: UserResource::class)]
+        #[DedocResponse(422, 'Unprocessable Content', type: ErrorResource::class)]
+        #[DedocResponse(503, 'Service unavailable', type: ErrorResource::class)]
+        #[Group('Auth - Public')]
+        public function register(RegisterRequest $request): Response
         {
             return $this->forwardToService($request, 'auth');
         }
@@ -66,21 +56,14 @@
          *
          * Returns authenticated user information.
          *
-         * @group Authentication
          * @authenticated
          *
-         * @response 200 {
-         *   "id": 1,
-         *   "name": "John Doe",
-         *   "email": "user@example.com",
-         *   "created_at": "2023-10-27T12:00:00.000000Z",
-         *   "updated_at": "2023-10-27T12:00:00.000000Z"
-         * }
-         *
-         * @response 401 {
-         *   "message": "Unauthenticated."
-         * }
          */
+
+        #[DedocResponse(200, 'OK', type: UserResource::class)]
+        #[DedocResponse(401, 'Unauthorized', type: ErrorResource::class)]
+        #[DedocResponse(503, 'Service unavailable', type: ErrorResource::class)]
+        #[Group('Auth - Private')]
         public function me(Request $request): Response
         {
             return $this->forwardToService($request, 'auth');
@@ -91,15 +74,14 @@
          *
          * Refreshes JWT token.
          *
-         * @group Authentication
          * @authenticated
          *
-         * @response 200 {
-         *   "access_token": "new_jwt_token",
-         *   "token_type": "bearer",
-         *   "expires_in": 3600
-         * }
          */
+
+        #[DedocResponse(200, 'OK', type: TokenResource::class)]
+        #[DedocResponse(401, 'Unauthorized', type: ErrorResource::class)]
+        #[DedocResponse(503, 'Service unavailable', type: ErrorResource::class)]
+        #[Group('Auth - Private')]
         public function refresh(Request $request): Response
         {
             return $this->forwardToService($request, 'auth');
@@ -111,12 +93,13 @@
          * Invalidates current user token.
          *
          * @group Authentication
-         * @authenticated
          *
-         * @response 200 {
-         *   "message": "Successfully logged out"
-         * }
          */
+
+        #[DedocResponse(200, 'OK', type: 'array{message: string}')]
+        #[DedocResponse(401, 'Unauthorized', type: ErrorResource::class)]
+        #[DedocResponse(503, 'Service unavailable', type: ErrorResource::class)]
+        #[Group('Auth - Private')]
         public function logout(Request $request): Response
         {
             return $this->forwardToService($request, 'auth');

@@ -21,3 +21,12 @@ seed:
 
 test:
 	bash scripts/run-tests.sh
+
+docs-build:
+	docker compose exec -T api-php php artisan scramble:export
+
+docs-clean:
+	docker compose exec -T api-php rm -rf storage/api-docs
+
+docs-debug:
+	docker compose exec -T api-php php artisan scramble:export -vvv

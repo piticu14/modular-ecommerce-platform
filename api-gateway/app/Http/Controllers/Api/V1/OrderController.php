@@ -2,6 +2,11 @@
 
     namespace App\Http\Controllers\Api\V1;
 
+    use App\Http\Requests\Api\V1\Order\StoreOrderRequest;
+    use App\Http\Resources\Api\V1\Common\ErrorResource;
+    use App\Http\Resources\Api\V1\Order\OrderResource;
+    use Dedoc\Scramble\Attributes\Response as DedocResponse;
+    use Dedoc\Scramble\Attributes\Group;
     use Illuminate\Http\Request;
     use Symfony\Component\HttpFoundation\Response;
 
@@ -12,32 +17,14 @@
          *
          * Returns a list of authenticated user's orders.
          *
-         * @group Orders
          * @authenticated
          *
-         * @response 200 {
-         *   "data": [
-         *     {
-         *       "id": "9a2e88a5-0000-0000-0000-000000000000",
-         *       "status": "PENDING",
-         *       "currency": "USD",
-         *       "subtotal": 199.98,
-         *       "total": 199.98,
-         *       "items": [
-         *         {
-         *           "product_uuid": "8b3f99b6-0000-0000-0000-000000000000",
-         *           "product_name": "My Product",
-         *           "price": 99.99,
-         *           "currency": "USD",
-         *           "quantity": 2,
-         *           "line_total": 199.98
-         *         }
-         *       ],
-         *       "created_at": "2023-10-27T12:00:00.000000Z"
-         *     }
-         *   ]
-         * }
          */
+
+        #[DedocResponse(200, 'OK', type: 'array<'.OrderResource::class.'>')]
+        #[DedocResponse(401, 'Unauthorized', type: ErrorResource::class)]
+        #[DedocResponse(503, 'Service unavailable', type: ErrorResource::class)]
+        #[Group('Orders')]
         public function index(Request $request): Response
         {
             return $this->forwardToService($request, 'orders');
@@ -48,37 +35,18 @@
          *
          * Returns details of a specific order by UUID.
          *
-         * @group Orders
          * @authenticated
          *
-         * @urlParam id string required Order UUID. Example: 9a2e88a5-0000-0000-0000-000000000000
+         * @param string $id Order UUID (e.g. 9a2e88a5-0000-0000-0000-000000000000)
          *
-         * @response 200 {
-         *   "data": {
-         *     "id": "9a2e88a5-0000-0000-0000-000000000000",
-         *     "status": "CONFIRMED",
-         *     "currency": "USD",
-         *     "subtotal": 199.98,
-         *     "total": 199.98,
-         *     "items": [
-         *         {
-         *           "product_uuid": "8b3f99b6-0000-0000-0000-000000000000",
-         *           "product_name": "My Product",
-         *           "price": 99.99,
-         *           "currency": "USD",
-         *           "quantity": 2,
-         *           "line_total": 199.98
-         *         }
-         *     ],
-         *     "created_at": "2023-10-27T12:00:00.000000Z"
-         *   }
-         * }
-         *
-         * @response 404 {
-         *   "message": "Not Found"
-         * }
          */
-        public function show(Request $request, int|string $id): Response
+
+        #[DedocResponse(200, 'OK', type: OrderResource::class)]
+        #[DedocResponse(401, 'Unauthorized', type: ErrorResource::class)]
+        #[DedocResponse(404, 'Not found', type: ErrorResource::class)]
+        #[DedocResponse(503, 'Service unavailable', type: ErrorResource::class)]
+        #[Group('Orders')]
+        public function show(Request $request, string $id): Response
         {
             return $this->forwardToService($request, 'orders');
         }
@@ -88,46 +56,16 @@
          *
          * Creates a new order for the authenticated user.
          *
-         * @group Orders
          * @authenticated
          *
-         * @bodyParam items array required List of items to order.
-         * @bodyParam items[].product_uuid string required Product UUID. Example: 8b3f99b6-0000-0000-0000-000000000000
-         * @bodyParam items[].quantity integer required Quantity (1-100). Example: 2
-         *
-         * @response 201 {
-         *   "data": {
-         *     "id": "9a2e88a5-0000-0000-0000-000000000000",
-         *     "status": "PENDING",
-         *     "currency": "USD",
-         *     "subtotal": 199.98,
-         *     "total": 199.98,
-         *     "items": [
-         *         {
-         *           "product_uuid": "8b3f99b6-0000-0000-0000-000000000000",
-         *           "product_name": "My Product",
-         *           "price": 99.99,
-         *           "currency": "USD",
-         *           "quantity": 2,
-         *           "line_total": 199.98
-         *         }
-         *     ],
-         *     "created_at": "2023-10-27T12:00:00.000000Z"
-         *   }
-         * }
-         *
-         * @response 503 {
-         *   "message": "Order could not be created"
-         * }
-         *
-         * @response 422 {
-         *   "message": "The items field is required.",
-         *   "errors": {
-         *     "items": ["The items field is required."]
-         *   }
-         * }
          */
-        public function store(Request $request): Response
+
+        #[DedocResponse(201, 'Created', type: OrderResource::class)]
+        #[DedocResponse(401, 'Unauthorized', type: ErrorResource::class)]
+        #[DedocResponse(422, 'Unprocessable Content', type: ErrorResource::class)]
+        #[DedocResponse(503, 'Service unavailable', type: ErrorResource::class)]
+        #[Group('Orders')]
+        public function store(StoreOrderRequest $request): Response
         {
             return $this->forwardToService($request, 'orders');
         }
@@ -137,18 +75,18 @@
          *
          * Cancels an order by UUID.
          *
-         * @group Orders
          * @authenticated
          *
-         * @urlParam id string required Order UUID. Example: 9a2e88a5-0000-0000-0000-000000000000
+         * @param string $id Order UUID (e.g. 9a2e88a5-0000-0000-0000-000000000000)
          *
-         * @response 204
-         *
-         * @response 409 {
-         *   "message": "Order is already final and cannot be cancelled"
-         * }
          */
-        public function destroy(Request $request, int|string $id): Response
+
+        #[DedocResponse(204, 'No Content')]
+        #[DedocResponse(401, 'Unauthorized', type: ErrorResource::class)]
+        #[DedocResponse(404, 'Not Found', type: ErrorResource::class)]
+        #[DedocResponse(503, 'Service unavailable', type: ErrorResource::class)]
+        #[Group('Orders')]
+        public function destroy(Request $request, string $id): Response
         {
             return $this->forwardToService($request, 'orders');
         }

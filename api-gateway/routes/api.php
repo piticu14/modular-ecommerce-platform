@@ -39,7 +39,7 @@
                 Route::post('/', [ProductController::class, 'store']);
                 Route::delete('/{id}', [ProductController::class, 'destroy']);
 
-                Route::get('/{product}/stock-reservations', [ProductController::class, 'stockReservations']);
+                Route::get('/{id}/stock-reservations', [ProductController::class, 'stockReservations']);
 
             });
 
