@@ -12,16 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('order_items', function (Blueprint $table) {
-
+            $table->dropIndex(['order_id', 'product_id']);
+            $table->dropIndex(['product_id']);
             $table->dropColumn('product_id');
-
-            $table->uuid('product_uuid')->nullable()->after('order_id');
-        });
-
-        DB::statement('UPDATE order_items SET product_uuid = UUID() WHERE product_uuid IS NULL');
-
-        Schema::table('order_items', function (Blueprint $table) {
-            $table->uuid('product_uuid')->nullable(false)->change();
+            $table->uuid('product_uuid')->after('order_id');
             $table->unique('product_uuid');
         });
     }
@@ -34,6 +28,7 @@ return new class extends Migration
         Schema::table('order_items', function (Blueprint $table) {
             $table->dropColumn('product_uuid');
             $table->unsignedBigInteger('product_id')->index();
+            $table->index(['order_id', 'product_id']);
         });
     }
 };

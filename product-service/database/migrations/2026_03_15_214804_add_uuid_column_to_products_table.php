@@ -15,7 +15,18 @@ return new class extends Migration
             $table->uuid()->nullable()->after('id');
         });
 
-        DB::statement('UPDATE products SET uuid = UUID() WHERE uuid IS NULL');
+        DB::table('products')
+            ->whereNull('uuid')
+            ->orderBy('id')
+            ->chunkById(100, function ($products) {
+                foreach ($products as $product) {
+                    DB::table('products')
+                        ->where('id', $product->id)
+                        ->update([
+                            'uuid' => (string) Str::uuid(),
+                        ]);
+                }
+            });
 
         Schema::table('products', function (Blueprint $table) {
             $table->uuid()->nullable(false)->change();

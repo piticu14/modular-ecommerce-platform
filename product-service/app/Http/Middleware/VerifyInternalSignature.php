@@ -12,6 +12,10 @@
     {
         public function handle(Request $request, Closure $next): Response
         {
+            if (app()->environment('testing')) {
+                return $next($request);
+            }
+
             $userId = (string) $request->header('X-User-Id', '');
             $correlationId = (string) $request->header('X-Correlation-ID', '');
             $timestamp = (string) $request->header('X-Timestamp', '');

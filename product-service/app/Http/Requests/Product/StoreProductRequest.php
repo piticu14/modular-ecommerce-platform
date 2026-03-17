@@ -10,6 +10,7 @@
         public function rules(): array
         {
             return [
+                'uuid' => ['nullable', 'string', 'uuid'],
                 'name' => ['required', 'string', 'max:255'],
                 'price' => ['required', 'numeric', 'min:0'],
                 'currency' => ['required', 'string', 'size:3'],

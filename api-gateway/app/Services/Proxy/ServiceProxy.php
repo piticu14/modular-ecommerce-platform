@@ -9,7 +9,7 @@
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\Http;
 
-    final class ServiceProxy
+    class ServiceProxy
     {
         public function forward(Request $request, string $baseUrl, bool $signed = false): Response
         {
@@ -39,7 +39,9 @@
                 ->send(
                     $request->method(),
                     $url,
-                    [
+                    $request->method() === 'GET' ? [
+                        'query' => $request->query(),
+                    ] : [
                         'query' => $request->query(),
                         'json' => $request->all(),
                     ]

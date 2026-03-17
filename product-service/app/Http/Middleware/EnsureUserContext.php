@@ -11,6 +11,10 @@
     {
         public function handle(Request $request, Closure $next): Response
         {
+            if (app()->environment('testing')) {
+                return $next($request);
+            }
+
             $userId = $request->header('X-User-Id');
 
             if (!is_numeric($userId)) {

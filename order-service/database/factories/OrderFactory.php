@@ -16,7 +16,7 @@ class OrderFactory extends Factory
         return [
             'uuid' => fake()->uuid(),
             'user_id' => fake()->optional()->numberBetween(1, 10),
-            'status' => fake()->randomElement(['PENDING', 'PAID', 'CANCELLED']),
+            'status' => fake()->randomElement(['pending', 'confirmed', 'failed', 'cancelled']),
             'currency' => 'CZK',
             'subtotal' => 0,
             'total' => 0,
