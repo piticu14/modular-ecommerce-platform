@@ -12,12 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('stock_reservations', function (Blueprint $table) {
-            $table->uuid('order_uuid')->unique()->after('id');
-            $table->uuid('order_item_uuid')->unique()->after('id');
+            $table->uuid('order_uuid')->nullable()->after('id');
+            $table->uuid('order_item_uuid')->nullable()->after('id');
 
             $table->dropColumn('order_id');
             $table->dropColumn('order_item_id');
 
+        });
+
+        DB::statement('UPDATE stock_reservations SET order_uuid = UUID() WHERE order_uuid IS NULL');
+        DB::statement('UPDATE stock_reservations SET order_item_uuid = UUID() WHERE order_item_uuid IS NULL');
+
+        Schema::table('stock_reservations', function (Blueprint $table) {
+            $table->uuid('order_uuid')->nullable(false)->change();
+            $table->uuid('order_item_uuid')->nullable(false)->change();
             $table->index('order_uuid');
             $table->index('order_item_uuid');
         });

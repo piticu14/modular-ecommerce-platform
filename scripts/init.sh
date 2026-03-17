@@ -58,7 +58,7 @@ echo "Running migrations..."
 for service in "${DB_SERVICES[@]}"
 do
   echo "Running migrations for $service..."
-  docker compose exec -T "$service" php artisan migrate --force
+  docker compose exec -T "$service" php artisan migrate:fresh --force
 done
 
 echo "Project initialized!"

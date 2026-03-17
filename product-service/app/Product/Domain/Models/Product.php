@@ -2,6 +2,7 @@
 
     namespace App\Product\Domain\Models;
 
+    use App\Order\Domain\Models\Order;
     use App\Product\Domain\Enums\ProductStatus;
     use App\Product\Domain\Exceptions\ProductAlreadyArchivedException;
     use App\Stock\Domain\Models\StockReservation;
@@ -9,6 +10,7 @@
     use Illuminate\Database\Eloquent\Factories\HasFactory;
     use Illuminate\Database\Eloquent\Model;
     use Illuminate\Database\Eloquent\Relations\HasMany;
+    use Illuminate\Support\Str;
 
     class Product extends Model
     {
@@ -23,6 +25,15 @@
             'stock_reserved',
             'status',
         ];
+
+        protected static function booted(): void
+        {
+            static::creating(function (Product $product): void {
+                if (!$product->uuid) {
+                    $product->uuid = (string) Str::uuid();
+                }
+            });
+        }
 
         protected $casts = [
             'status' => ProductStatus::class,

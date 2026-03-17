@@ -12,15 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('products', function (Blueprint $table) {
-            Schema::table('products', function (Blueprint $table) {
-                $table->uuid('uuid')->nullable();
-            });
+            $table->uuid()->nullable()->after('id');
+        });
 
-            DB::statement('UPDATE products SET uuid = UUID() WHERE uuid IS NULL');
+        DB::statement('UPDATE products SET uuid = UUID() WHERE uuid IS NULL');
 
-            Schema::table('products', function (Blueprint $table) {
-                $table->unique('uuid');
-            });
+        Schema::table('products', function (Blueprint $table) {
+            $table->uuid()->nullable(false)->change();
+            $table->unique('uuid');
         });
     }
 

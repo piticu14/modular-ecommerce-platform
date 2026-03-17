@@ -15,7 +15,14 @@ return new class extends Migration
 
             $table->dropColumn('product_id');
 
-            $table->uuid('product_uuid')->after('order_id');
+            $table->uuid('product_uuid')->nullable()->after('order_id');
+        });
+
+        DB::statement('UPDATE order_items SET product_uuid = UUID() WHERE product_uuid IS NULL');
+
+        Schema::table('order_items', function (Blueprint $table) {
+            $table->uuid('product_uuid')->nullable(false)->change();
+            $table->unique('product_uuid');
         });
     }
 
