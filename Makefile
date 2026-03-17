@@ -30,3 +30,13 @@ docs-clean:
 
 docs-debug:
 	docker compose exec -T api-php php artisan scramble:export -vvv
+
+check-frontend:
+	docker compose exec -T frontend npm run lint
+	docker compose exec -T frontend npm run ts-check
+	docker compose exec -T frontend npm run format:check
+
+fix-frontend:
+	docker compose exec -T frontend npm run lint -- --fix
+	docker compose exec -T frontend npm run format
+
