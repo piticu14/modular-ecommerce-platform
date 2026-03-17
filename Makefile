@@ -18,3 +18,6 @@ composer:
 
 seed:
 	bash scripts/seed.sh
+
+test:
+	bash scripts/run-tests.sh

@@ -13,7 +13,18 @@
     {
         public function forward(Request $request, string $baseUrl, bool $signed = false): Response
         {
-            $url = rtrim($baseUrl, '/') . '/' . ltrim($request->path(), '/');
+            $path = ltrim($request->path(), '/');
+            if (str_starts_with($path, 'api/')) {
+                $path = substr($path, 4);
+            }
+            $url = rtrim($baseUrl, '/') . '/api/' . ltrim($path, '/');
+
+            // Log for debugging (only in testing)
+            if (app()->environment('testing')) {
+                \Log::info("Forwarding to: $url");
+            }
+
+
 
             $headers = $this->forwardHeaders($request);
 
@@ -33,15 +44,13 @@
                 $headers['X-Internal-Signature'] = $signature;
             }
 
-            return Http::timeout(5)
-                ->retry(2, 100)
+            return Http::timeout(10)
+                ->retry(3, 500)
                 ->withHeaders($headers)
                 ->send(
                     $request->method(),
                     $url,
-                    $request->method() === 'GET' ? [
-                        'query' => $request->query(),
-                    ] : [
+                    [
                         'query' => $request->query(),
                         'json' => $request->all(),
                     ]

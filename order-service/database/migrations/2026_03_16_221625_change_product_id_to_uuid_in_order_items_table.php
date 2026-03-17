@@ -12,11 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('order_items', function (Blueprint $table) {
+            $table->dropForeign(['order_id']);
             $table->dropIndex(['order_id', 'product_id']);
             $table->dropIndex(['product_id']);
             $table->dropColumn('product_id');
             $table->uuid('product_uuid')->after('order_id');
             $table->unique('product_uuid');
+
+            $table->foreign('order_id')
+                ->references('id')->on('orders')
+                ->cascadeOnDelete();
         });
     }
 

@@ -1,0 +1,77 @@
+services:
+  mysql-auth:
+    ports: !reset []
+
+  mysql-orders:
+    ports: !reset []
+
+  mysql-products:
+    ports: !reset []
+
+  rabbitmq:
+    ports: !reset []
+
+  redis:
+    ports: !reset []
+
+  auth-php:
+    environment:
+      APP_ENV: testing
+      DB_DATABASE: auth_test
+    ports: !reset []
+
+  auth-nginx:
+    ports: !reset []
+
+  order-php:
+    environment:
+      APP_ENV: testing
+      DB_DATABASE: orders_test
+    ports: !reset []
+
+  order-worker:
+    environment:
+      APP_ENV: testing
+      DB_DATABASE: orders_test
+    ports: !reset []
+
+  order-outbox-worker:
+    environment:
+      APP_ENV: testing
+      DB_DATABASE: orders_test
+    ports: !reset []
+
+  order-nginx:
+    ports: !reset []
+
+  product-php:
+    environment:
+      APP_ENV: testing
+      DB_DATABASE: products_test
+    ports: !reset []
+
+  product-worker:
+    environment:
+      APP_ENV: testing
+      DB_DATABASE: products_test
+    ports: !reset []
+
+  product-outbox-worker:
+    environment:
+      APP_ENV: testing
+      DB_DATABASE: products_test
+    ports: !reset []
+
+  product-nginx:
+    ports: !reset []
+
+  api-php:
+    environment:
+      APP_ENV: testing
+    ports: !reset []
+
+  api-nginx:
+    ports: !reset []
+
+  frontend:
+    ports: !reset []

@@ -11,6 +11,7 @@ use App\Product\Domain\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
