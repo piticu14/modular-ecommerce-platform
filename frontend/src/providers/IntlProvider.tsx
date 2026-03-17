@@ -1,5 +1,6 @@
 import { IntlProvider } from "react-intl";
-import { createContext, useState } from "react";
+import { useState } from "react";
+import { LocaleContext } from "./LocaleContext";
 
 import type { ReactNode } from "react";
 
@@ -8,47 +9,34 @@ import en from "../locales/en.json";
 
 type Locale = "cs" | "en";
 
-type LocaleContextType = {
-    locale: Locale;
-    setLocale: (locale: Locale) => void;
-};
-
 const messages: Record<Locale, typeof cs> = {
-    cs,
-    en
+  cs,
+  en,
 };
-
-export const LocaleContext = createContext<LocaleContextType>({
-    locale: "cs",
-    setLocale: () => {}
-});
 
 export default function AppIntlProvider({ children }: { children: ReactNode }) {
-    const getInitialLocale = (): Locale => {
-        const stored = localStorage.getItem("locale");
+  const getInitialLocale = (): Locale => {
+    const stored = localStorage.getItem("locale");
 
-        if (stored === "cs" || stored === "en") {
-            return stored;
-        }
+    if (stored === "cs" || stored === "en") {
+      return stored;
+    }
 
-        return "cs";
-    };
+    return "cs";
+  };
 
-    const [localeState, setLocaleState] = useState<Locale>(getInitialLocale);
+  const [localeState, setLocaleState] = useState<Locale>(getInitialLocale);
 
-    const setLocale = (locale: Locale) => {
-        localStorage.setItem("locale", locale);
-        setLocaleState(locale);
-    };
+  const setLocale = (locale: Locale) => {
+    localStorage.setItem("locale", locale);
+    setLocaleState(locale);
+  };
 
-    return (
-        <LocaleContext.Provider value={{ locale: localeState, setLocale }}>
-            <IntlProvider
-                locale={localeState}
-                messages={messages[localeState]}
-            >
-                {children}
-            </IntlProvider>
-        </LocaleContext.Provider>
-    );
+  return (
+    <LocaleContext.Provider value={{ locale: localeState, setLocale }}>
+      <IntlProvider locale={localeState} messages={messages[localeState]}>
+        {children}
+      </IntlProvider>
+    </LocaleContext.Provider>
+  );
 }
