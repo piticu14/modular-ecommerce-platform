@@ -4,17 +4,17 @@
     use App\Http\Controllers\AuthController;
 
 
-    Route::prefix('auth')->controller(AuthController::class)->group(function () {
+    Route::prefix('v1')->group(function () {
+        Route::prefix('auth')->controller(AuthController::class)->group(function () {
 
-        Route::post('/register', 'register');
-        Route::post('/login', 'login');
+            Route::post('/register', 'register');
+            Route::post('/login', 'login');
 
-        Route::middleware('auth:api')->group(function () {
-
-            Route::post('/logout', 'logout');
-            Route::post('/refresh', 'refresh');
-            Route::get('/me',  'me');
+            Route::middleware('auth:api')->group(function () {
+                Route::post('/logout', 'logout');
+                Route::post('/refresh', 'refresh');
+                Route::get('/me', 'me');
+            });
 
         });
-
     });

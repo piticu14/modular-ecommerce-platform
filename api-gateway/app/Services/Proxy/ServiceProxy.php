@@ -11,41 +11,18 @@
 
     class ServiceProxy
     {
-        public function forward(Request $request, string $baseUrl, bool $signed = false): Response
+        public function forward(Request $request, string $service): Response
         {
-            $path = ltrim($request->path(), '/');
-            if (str_starts_with($path, 'api/')) {
-                $path = substr($path, 4);
-            }
-            $url = rtrim($baseUrl, '/') . '/api/' . ltrim($path, '/');
-
-            // Log for debugging (only in testing)
-            if (app()->environment('testing')) {
-                \Log::info("Forwarding to: $url");
-            }
-
-
-
+            $config = $this->getServiceConfig($service);
+            $url = $this->resolveUrl($request, $config);
             $headers = $this->forwardHeaders($request);
 
-            if ($signed) {
-                $timestamp = (string)now()->timestamp;
-
-                $signature = InternalRequestSigner::sign(
-                    method: $request->method(),
-                    path: '/' . $request->path(),
-                    userId: (string) RequestContext::userId(),
-                    correlationId: (string) RequestContext::correlationId(),
-                    timestamp: $timestamp,
-                    secret: config('services.internal.token')
-                );
-
-                $headers['X-Timestamp'] = $timestamp;
-                $headers['X-Internal-Signature'] = $signature;
+            if ($config['signed'] ?? false) {
+                $headers = $this->signHeaders($request, $headers);
             }
 
-            return Http::timeout(10)
-                ->retry(3, 500)
+            return Http::timeout($config['timeout'] ?? 10)
+                ->retry($config['retries'] ?? 3, $config['retry_sleep'] ?? 500)
                 ->withHeaders($headers)
                 ->send(
                     $request->method(),
@@ -68,5 +45,70 @@
                 'Content-Type' => $request->header('Content-Type', 'application/json'),
 
             ]);
+        }
+
+        private function resolveUrl(Request $request, array $config): string
+        {
+            $baseUrl = $config['url'];
+            $path = ltrim($request->path(), '/');
+
+            if (str_starts_with($path, 'api/')) {
+                $path = substr($path, 4);
+            }
+
+            $path = $this->mapVersion($path, $config);
+
+            return rtrim($baseUrl, '/') . '/api/' . ltrim($path, '/');
+        }
+
+        private function mapVersion(string $path, array $config): string
+        {
+            $segments = explode('/', $path);
+
+            if (empty($segments[0])) {
+                return $path;
+            }
+
+            $gatewayVersion = $segments[0];
+
+            if (!preg_match('/^v\d+$/', $gatewayVersion)) {
+                return $path;
+            }
+
+            $versionMap = $config['version_map'] ?? [];
+            $serviceVersion = $versionMap[$gatewayVersion] ?? $gatewayVersion;
+            $segments[0] = $serviceVersion;
+
+            return implode('/', $segments);
+        }
+
+        private function getServiceConfig(string $service): array
+        {
+            $config = config("services.proxy.services.$service");
+
+            if (!$config) {
+                abort(404, "Service [$service] is not configured.");
+            }
+
+            return $config;
+        }
+
+        private function signHeaders(Request $request, array $headers): array
+        {
+            $timestamp = (string) now()->timestamp;
+
+            $signature = InternalRequestSigner::sign(
+                method: $request->method(),
+                path: '/' . $request->path(),
+                userId: (string) RequestContext::userId(),
+                correlationId: (string) RequestContext::correlationId(),
+                timestamp: $timestamp,
+                secret: config('services.internal.token')
+            );
+
+            $headers['X-Timestamp'] = $timestamp;
+            $headers['X-Internal-Signature'] = $signature;
+
+            return $headers;
         }
     }

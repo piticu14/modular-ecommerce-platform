@@ -93,6 +93,7 @@ services:
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_EXCHANGE: ecommerce.events
+      COMPOSER_CACHE_DIR: /tmp/composer-cache
     depends_on:
       - mysql-auth
       - redis
@@ -130,6 +131,7 @@ services:
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_EXCHANGE: ecommerce.events
+      COMPOSER_CACHE_DIR: /tmp/composer-cache
     depends_on:
       - redis
       - rabbitmq
@@ -161,6 +163,7 @@ services:
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_EXCHANGE: ecommerce.events
+      COMPOSER_CACHE_DIR: /tmp/composer-cache
     depends_on:
       - api-php
       - redis
@@ -199,6 +202,7 @@ services:
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_EXCHANGE: ecommerce.events
+      COMPOSER_CACHE_DIR: /tmp/composer-cache
     depends_on:
       - mysql-orders
       - redis
@@ -236,6 +240,7 @@ services:
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_EXCHANGE: ecommerce.events
+      COMPOSER_CACHE_DIR: /tmp/composer-cache
     depends_on:
       - order-php
       - mysql-orders
@@ -264,6 +269,7 @@ services:
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_EXCHANGE: ecommerce.events
+      COMPOSER_CACHE_DIR: /tmp/composer-cache
     depends_on:
       - mysql-orders
       - rabbitmq
@@ -336,6 +342,7 @@ services:
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_EXCHANGE: ecommerce.events
+      COMPOSER_CACHE_DIR: /tmp/composer-cache
     depends_on:
       - product-php
       - mysql-products
@@ -352,6 +359,16 @@ services:
     user: "${UID}:${GID}"
     command: [ "php", "artisan", "outbox:work"]
     restart: unless-stopped
+    environment:
+      APP_ENV: local
+      DB_HOST: mysql-products
+      DB_DATABASE: products
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_EXCHANGE: ecommerce.events
+      COMPOSER_CACHE_DIR: /tmp/composer-cache
     volumes:
       - ./product-service:/var/www/html
     depends_on:

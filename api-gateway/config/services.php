@@ -44,14 +44,29 @@ return [
             'auth' => [
                 'url' => env('AUTH_SERVICE_URL'),
                 'signed' => false,
+                'timeout' => 5,
+                'retries' => 2,
+                'version_map' => [
+                    'v1' => 'v1',
+                ],
             ],
             'orders' => [
                 'url' => env('ORDER_SERVICE_URL'),
                 'signed' => true,
+                'timeout' => 5,
+                'retries' => 2,
+                'version_map' => [
+                    'v1' => 'v1',
+                ],
             ],
             'products' => [
                 'url' => env('PRODUCT_SERVICE_URL'),
                 'signed' => true,
+                'timeout' => 5,
+                'retries' => 2,
+                'version_map' => [
+                    'v1' => 'v1',
+                ],
             ],
         ],
     ],
