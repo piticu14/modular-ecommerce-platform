@@ -1,10 +1,7 @@
 <?php
 
+namespace App\Product\Domain\Exceptions;
 
-    namespace App\Product\Domain\Exceptions;
+use RuntimeException;
 
-    use RuntimeException;
-
-    class ProductAlreadyArchivedException extends RuntimeException
-    {
-    }
+class ProductAlreadyArchivedException extends RuntimeException {}

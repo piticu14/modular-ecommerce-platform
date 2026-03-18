@@ -1,7 +1,7 @@
 <?php
 
-    use App\Http\Middleware\CorrelationId;
-    use App\Http\Middleware\VerifyJwt;
+use App\Http\Middleware\CorrelationId;
+use App\Http\Middleware\VerifyJwt;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;

@@ -306,6 +306,7 @@ services:
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_EXCHANGE: ecommerce.events
+      COMPOSER_CACHE_DIR: /tmp/composer-cache
     depends_on:
       - mysql-products
       - redis

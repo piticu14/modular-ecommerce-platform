@@ -1,5 +1,7 @@
 <?php
 
+use App\Jobs\ProcessRabbitMQMessageJob;
+
 return [
 
     /*
@@ -90,9 +92,9 @@ return [
 
             'options' => [
                 'queue' => [
-                    'job' => \App\Jobs\ProcessRabbitMQMessageJob::class,
+                    'job' => ProcessRabbitMQMessageJob::class,
                 ],
-            ]
+            ],
         ],
 
         'deferred' => [

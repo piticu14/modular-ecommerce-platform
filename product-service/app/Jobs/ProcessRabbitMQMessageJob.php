@@ -1,73 +1,72 @@
 <?php
 
+namespace App\Jobs;
 
-    namespace App\Jobs;
+use App\Messaging\Dispatcher\MessageDispatcher;
+use Illuminate\Support\Facades\Log;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob as BaseJob;
 
-    use App\Messaging\Dispatcher\MessageDispatcher;
-    use Illuminate\Support\Facades\Log;
-    use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob as BaseJob;
+class ProcessRabbitMQMessageJob extends BaseJob
+{
+    private const MAX_RETRIES = 5;
 
-    class ProcessRabbitMQMessageJob extends BaseJob
+    public function fire()
     {
-        private const MAX_RETRIES = 5;
+        $payload = $this->payload();
 
-        public function fire()
-        {
-            $payload = $this->payload();
+        try {
 
-            try {
+            app(MessageDispatcher::class)->dispatch($payload);
 
-                app(MessageDispatcher::class)->dispatch($payload);
+            $this->delete();
+
+        } catch (\Throwable $e) {
+
+            $attempt = $this->rabbitAttempts();
+
+            Log::warning('RabbitMQ retry attempt', [
+                'attempt' => $attempt,
+                'max_retries' => self::MAX_RETRIES,
+                'event_id' => $payload['event_id'] ?? null,
+                'error' => $e->getMessage(),
+            ]);
+
+            if ($attempt >= self::MAX_RETRIES) {
+
+                $this->getRabbitMQ()->pushRaw(
+                    $this->getRawBody(),
+                    'product-service.dlq'
+                );
 
                 $this->delete();
 
-            } catch (\Throwable $e) {
-
-                $attempt = $this->rabbitAttempts();
-
-                Log::warning('RabbitMQ retry attempt', [
-                    'attempt' => $attempt,
-                    'max_retries' => self::MAX_RETRIES,
-                    'event_id' => $payload['event_id'] ?? null,
-                    'error' => $e->getMessage()
+                Log::warning('Message moved to DLQ', [
+                    'attempts' => $attempt,
                 ]);
 
-                if ($attempt >= self::MAX_RETRIES) {
-
-                    $this->getRabbitMQ()->pushRaw(
-                        $this->getRawBody(),
-                        'product-service.dlq'
-                    );
-
-                    $this->delete();
-
-                    Log::warning('Message moved to DLQ', [
-                        'attempts' => $attempt
-                    ]);
-
-                    return;
-                }
-
-                $this->getRabbitMQ()->reject($this);
-
-            }
-        }
-
-        private function rabbitAttempts(): int
-        {
-            $headers = $this->getRabbitMQMessage()->get_properties()['application_headers'] ?? null;
-
-            if (!$headers) {
-                return 0;
+                return;
             }
 
-            $data = $headers->getNativeData();
+            $this->getRabbitMQ()->reject($this);
 
-            return $data['x-death'][0]['count'] ?? 0;
-        }
-
-        public function getName(): string
-        {
-            return 'rabbitmq.raw.message';
         }
     }
+
+    private function rabbitAttempts(): int
+    {
+        $headers = $this->getRabbitMQMessage()->get_properties()['application_headers'] ?? null;
+
+        if (! $headers) {
+            return 0;
+        }
+
+        $data = $headers->getNativeData();
+
+        return $data['x-death'][0]['count'] ?? 0;
+    }
+
+    public function getName(): string
+    {
+        return 'rabbitmq.raw.message';
+    }
+}

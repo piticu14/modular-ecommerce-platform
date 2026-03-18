@@ -1,49 +1,48 @@
 <?php
-    namespace App\Messaging\Consumers;
 
+namespace App\Messaging\Consumers;
 
-    use App\Messaging\Infrastructure\Models\ProcessedEvent;
-    use App\Stock\Application\Actions\ReserveStockAction;
-    use Illuminate\Support\Facades\DB;
-    use Illuminate\Support\Facades\Log;
+use App\Messaging\Infrastructure\Models\ProcessedEvent;
+use App\Stock\Application\Actions\ReserveStockAction;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
-    class OrderCreatedHandler
+class OrderCreatedHandler
+{
+    public function __construct(
+        private ReserveStockAction $reserveStock
+    ) {}
+
+    public function handle(array $event): void
     {
-        public function __construct(
-            private ReserveStockAction $reserveStock
-        ) {}
+        $eventId = $event['event_id'];
 
-        public function handle(array $event): void
-        {
-            $eventId = $event['event_id'];
+        DB::transaction(function () use ($event, $eventId) {
 
+            $orderUuid = $event['data']['order_uuid'];
 
-            DB::transaction(function () use ($event, $eventId) {
+            $exists = ProcessedEvent::where([
+                'event_id' => $eventId,
+                'consumer' => 'order_created',
+            ])->lockForUpdate()->exists();
 
-                $orderUuid = $event['data']['order_uuid'];
+            if ($exists) {
+                return;
+            }
 
-                $exists = ProcessedEvent::where([
-                    'event_id' => $eventId,
-                    'consumer' => 'order_created'
-                ])->lockForUpdate()->exists();
+            $this->reserveStock->handle($event);
 
-                if ($exists) {
-                    return;
-                }
+            ProcessedEvent::create([
+                'event_id' => $eventId,
+                'consumer' => 'order_created',
+                'processed_at' => now(),
+            ]);
 
-                $this->reserveStock->handle($event);
+            Log::info('OrderCreated received', [
+                'order_uuid' => $orderUuid,
+                'correlation_id' => $event['correlation_id'] ?? null,
+            ]);
+        });
 
-                ProcessedEvent::create([
-                    'event_id' => $eventId,
-                    'consumer' => 'order_created',
-                    'processed_at' => now(),
-                ]);
-
-                Log::info('OrderCreated received', [
-                    'order_uuid' => $orderUuid,
-                    'correlation_id' => $event['correlation_id'] ?? null,
-                ]);
-            });
-
-        }
     }
+}

@@ -22,16 +22,19 @@ class RegisterRequest extends FormRequest
         return [
             /**
              * The user's full name.
+             *
              * @example John Doe
              */
             'name' => ['required', 'string', 'max:255'],
             /**
              * The user's email address.
+             *
              * @example user@example.com
              */
             'email' => ['required', 'string', 'email', 'max:255'],
             /**
              * The user's password.
+             *
              * @example secret123
              */
             'password' => ['required', 'string', 'min:6'],

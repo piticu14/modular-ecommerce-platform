@@ -1,14 +1,14 @@
 <?php
 
-    namespace Database\Seeders;
+namespace Database\Seeders;
 
-    use App\Product\Domain\Models\Product;
-    use Illuminate\Database\Seeder;
+use App\Product\Domain\Models\Product;
+use Illuminate\Database\Seeder;
 
-    class ProductSeeder extends Seeder
+class ProductSeeder extends Seeder
+{
+    public function run(): void
     {
-        public function run(): void
-        {
-            Product::factory(50)->create();
-        }
+        Product::factory(50)->create();
     }
+}

@@ -1,9 +1,7 @@
 <?php
 
-    namespace App\Order\Application\Exceptions;
+namespace App\Order\Application\Exceptions;
 
-    use RuntimeException;
+use RuntimeException;
 
-    class OrderCreationFailedException extends RuntimeException
-    {
-    }
+class OrderCreationFailedException extends RuntimeException {}

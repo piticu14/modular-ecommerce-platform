@@ -1,13 +1,12 @@
 <?php
 
-    use App\Http\Controllers\HealthController;
+use App\Http\Controllers\HealthController;
 
-    /*
-    |--------------------------------------------------------------------------
-    | HEALTH
-    |--------------------------------------------------------------------------
-    */
+/*
+|--------------------------------------------------------------------------
+| HEALTH
+|--------------------------------------------------------------------------
+*/
 
-
-    Route::get('/health', [HealthController::class, 'health']);
-    Route::get('/health/ready', [HealthController::class, 'ready']);
+Route::get('/health', [HealthController::class, 'health']);
+Route::get('/health/ready', [HealthController::class, 'ready']);

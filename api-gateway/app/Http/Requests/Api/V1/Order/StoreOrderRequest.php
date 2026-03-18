@@ -26,11 +26,13 @@ class StoreOrderRequest extends FormRequest
             'items' => ['required', 'array', 'min:1'],
             /**
              * The product UUID.
+             *
              * @example 8b3f99b6-0000-0000-0000-000000000000
              */
             'items.*.product_uuid' => ['required', 'string', 'uuid'],
             /**
              * The quantity to order.
+             *
              * @example 2
              */
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:100'],

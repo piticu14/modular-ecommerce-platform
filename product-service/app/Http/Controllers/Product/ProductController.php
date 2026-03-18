@@ -11,7 +11,6 @@ use App\Product\Domain\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
-use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -42,6 +41,7 @@ class ProductController extends Controller
     public function show(string $uuid): ProductResource
     {
         $product = Product::where('uuid', $uuid)->firstOrFail();
+
         return new ProductResource($product);
     }
 
@@ -70,10 +70,9 @@ class ProductController extends Controller
         } catch (ProductAlreadyArchivedException $e) {
 
             return response()->json([
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 409);
         }
-
 
         return response()->json([], 204);
     }

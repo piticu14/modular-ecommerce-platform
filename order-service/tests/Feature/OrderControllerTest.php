@@ -2,13 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Order\Application\DTO\ProductSnapshot;
 use App\Order\Domain\Enums\OrderStatus;
 use App\Order\Domain\Models\Order;
 use App\Order\Infrastructure\Clients\ProductServiceClient;
-use App\Order\Application\DTO\ProductSnapshot;
-use App\Order\Infrastructure\Exceptions\ProductServiceUnavailableException;
 use App\Order\Infrastructure\Exceptions\ProductNotFoundException;
-use App\Support\RequestContext;
+use App\Order\Infrastructure\Exceptions\ProductServiceUnavailableException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery\MockInterface;
 use Tests\TestCase;
@@ -50,7 +49,7 @@ class OrderControllerTest extends TestCase
                         stock_on_hand: 10,
                         stock_reserved: 0,
                         stock_available: 10
-                    )
+                    ),
                 ]);
         });
 
@@ -59,8 +58,8 @@ class OrderControllerTest extends TestCase
                 [
                     'product_uuid' => $productUuid,
                     'quantity' => 2,
-                ]
-            ]
+                ],
+            ],
         ]);
 
         $response->assertStatus(201)
@@ -70,14 +69,14 @@ class OrderControllerTest extends TestCase
         $this->assertDatabaseHas('orders', [
             'user_id' => 1,
             'total' => 200,
-            'status' => 'PENDING'
+            'status' => 'PENDING',
         ]);
     }
 
     public function test_cannot_create_order_with_empty_items()
     {
         $response = $this->signedRequest('POST', '/api/orders', [
-            'items' => []
+            'items' => [],
         ]);
 
         $response->assertStatus(422)
@@ -88,13 +87,13 @@ class OrderControllerTest extends TestCase
     {
         $this->mock(ProductServiceClient::class, function (MockInterface $mock) {
             $mock->shouldReceive('getProductsByUuid')
-                ->andThrow(new ProductServiceUnavailableException());
+                ->andThrow(new ProductServiceUnavailableException);
         });
 
         $response = $this->signedRequest('POST', '/api/orders', [
             'items' => [
-                ['product_uuid' => 'p1', 'quantity' => 1]
-            ]
+                ['product_uuid' => 'p1', 'quantity' => 1],
+            ],
         ]);
 
         $response->assertStatus(503)
@@ -113,8 +112,8 @@ class OrderControllerTest extends TestCase
         // Let's see how it behaves. It probably results in 500 if not handled.
         $response = $this->signedRequest('POST', '/api/orders', [
             'items' => [
-                ['product_uuid' => 'p1', 'quantity' => 1]
-            ]
+                ['product_uuid' => 'p1', 'quantity' => 1],
+            ],
         ]);
 
         $response->assertStatus(500);
@@ -134,7 +133,7 @@ class OrderControllerTest extends TestCase
     {
         $order = Order::factory()->create([
             'user_id' => 1,
-            'status' => OrderStatus::PENDING->value
+            'status' => OrderStatus::PENDING->value,
         ]);
 
         $response = $this->signedRequest('DELETE', "/api/orders/{$order->uuid}");
@@ -143,7 +142,7 @@ class OrderControllerTest extends TestCase
 
         $this->assertDatabaseHas('orders', [
             'id' => $order->id,
-            'status' => OrderStatus::CANCELLED->value
+            'status' => OrderStatus::CANCELLED->value,
         ]);
     }
 
@@ -151,7 +150,7 @@ class OrderControllerTest extends TestCase
     {
         $order = Order::factory()->create([
             'user_id' => 1,
-            'status' => OrderStatus::CONFIRMED->value
+            'status' => OrderStatus::CONFIRMED->value,
         ]);
 
         $response = $this->signedRequest('DELETE', "/api/orders/{$order->uuid}");

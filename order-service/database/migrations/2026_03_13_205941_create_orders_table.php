@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('currency', 3)->default('CZK');
 
             $table->unsignedBigInteger('subtotal')->default(0);
-            $table->unsignedBigInteger('total') ->default(0);
+            $table->unsignedBigInteger('total')->default(0);
 
             $table->timestamps();
 

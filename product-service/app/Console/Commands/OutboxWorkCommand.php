@@ -1,82 +1,83 @@
 <?php
 
-    namespace App\Console\Commands;
+namespace App\Console\Commands;
 
-    use App\Messaging\Infrastructure\Models\OutboxEvent;
-    use App\Messaging\Publishers\RabbitPublisher;
-    use Illuminate\Console\Command;
-    use Illuminate\Support\Facades\DB;
+use App\Messaging\Infrastructure\Models\OutboxEvent;
+use App\Messaging\Publishers\RabbitPublisher;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
-    class OutboxWorkCommand extends Command
+class OutboxWorkCommand extends Command
+{
+    protected $signature = 'outbox:work';
+
+    protected bool $running = true;
+
+    public function handle(RabbitPublisher $publisher): int
     {
-        protected $signature = 'outbox:work';
+        $this->info('Outbox worker started');
 
-        protected bool $running = true;
+        pcntl_async_signals(true);
 
-        public function handle(RabbitPublisher $publisher): int
-        {
-            $this->info('Outbox worker started');
+        pcntl_signal(SIGTERM, fn () => $this->shutdown());
+        pcntl_signal(SIGINT, fn () => $this->shutdown());
 
-            pcntl_async_signals(true);
+        while ($this->running) {
 
-            pcntl_signal(SIGTERM, fn() => $this->shutdown());
-            pcntl_signal(SIGINT, fn() => $this->shutdown());
+            $events = DB::transaction(function () {
 
-            while ($this->running) {
+                return OutboxEvent::query()
+                    ->whereNull('published_at')
+                    ->orderBy('occurred_at')
+                    ->limit(100)
+                    ->lock('FOR UPDATE SKIP LOCKED')
+                    ->get();
 
-                $events = DB::transaction(function () {
+            });
 
-                    return OutboxEvent::query()
-                        ->whereNull('published_at')
-                        ->orderBy('occurred_at')
-                        ->limit(100)
-                        ->lock('FOR UPDATE SKIP LOCKED')
-                        ->get();
+            if ($events->isEmpty()) {
 
-                });
+                usleep(200000);  // 200ms
 
-                if ($events->isEmpty()) {
-
-                    usleep(200000);  // 200ms
-                    continue;
-                }
-
-                foreach ($events as $event) {
-
-                    try {
-
-                        logger()->info('Publishing event', [
-                            'event_id' => $event->id,
-                            'event_type' => $event->event_type,
-                            'routing_key' => $event->routing_key,
-                        ]);
-
-                        $publisher->publish($event);
-
-                        $event->update([
-                            'published_at' => now(),
-                        ]);
-
-                    } catch (\Throwable $e) {
-
-                        $event->increment('attempts');
-
-                        logger()->error('Outbox publish failed', [
-                            'event_id' => $event->id,
-                            'error' => $e->getMessage(),
-                        ]);
-
-                    }
-                }
-
+                continue;
             }
 
-            return 0;
+            foreach ($events as $event) {
+
+                try {
+
+                    logger()->info('Publishing event', [
+                        'event_id' => $event->id,
+                        'event_type' => $event->event_type,
+                        'routing_key' => $event->routing_key,
+                    ]);
+
+                    $publisher->publish($event);
+
+                    $event->update([
+                        'published_at' => now(),
+                    ]);
+
+                } catch (\Throwable $e) {
+
+                    $event->increment('attempts');
+
+                    logger()->error('Outbox publish failed', [
+                        'event_id' => $event->id,
+                        'error' => $e->getMessage(),
+                    ]);
+
+                }
+            }
+
         }
 
-        protected function shutdown(): void
-        {
-            logger()->info('Outbox worker shutting down');
-            $this->running = false;
-        }
+        return 0;
     }
+
+    protected function shutdown(): void
+    {
+        logger()->info('Outbox worker shutting down');
+        $this->running = false;
+    }
+}

@@ -1,51 +1,51 @@
 <?php
 
-    namespace App\Http\Middleware;
+namespace App\Http\Middleware;
 
-    use Closure;
-    use Firebase\JWT\ExpiredException;
-    use Firebase\JWT\JWT;
-    use Firebase\JWT\Key;
+use Closure;
+use Firebase\JWT\ExpiredException;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
-
-    class VerifyJwt
+class VerifyJwt
+{
+    public function handle($request, Closure $next)
     {
-        public function handle($request, Closure $next)
-        {
-            $request->headers->remove('X-User-Id');
+        $request->headers->remove('X-User-Id');
 
-            $header = $request->header('Authorization');
+        $header = $request->header('Authorization');
 
-            if (!$header || !str_starts_with($header, 'Bearer ')) {
-                return response()->json(['error' => 'Missing token'], 401);
-            }
+        if (! $header || ! str_starts_with($header, 'Bearer ')) {
+            return response()->json(['error' => 'Missing token'], 401);
+        }
 
-            $token = substr($header, 7);
+        $token = substr($header, 7);
 
-            if (app()->environment('testing') && $token === 'fake-token') {
-                $request->headers->set('X-User-Id', '123');
-                return $next($request);
-            }
-
-            try {
-
-                $payload = JWT::decode(
-                    $token,
-                    new Key(config('services.jwt.secret'), 'HS256')
-                );
-
-                $request->headers->set('X-User-Id', $payload->sub);
-
-            } catch (ExpiredException $e) {
-
-                return response()->json(['error' => 'Token expired'], 401);
-
-            } catch (\Exception $e) {
-
-                return response()->json(['error' => 'Invalid token'], 401);
-
-            }
+        if (app()->environment('testing') && $token === 'fake-token') {
+            $request->headers->set('X-User-Id', '123');
 
             return $next($request);
         }
+
+        try {
+
+            $payload = JWT::decode(
+                $token,
+                new Key(config('services.jwt.secret'), 'HS256')
+            );
+
+            $request->headers->set('X-User-Id', $payload->sub);
+
+        } catch (ExpiredException $e) {
+
+            return response()->json(['error' => 'Token expired'], 401);
+
+        } catch (\Exception $e) {
+
+            return response()->json(['error' => 'Invalid token'], 401);
+
+        }
+
+        return $next($request);
     }
+}

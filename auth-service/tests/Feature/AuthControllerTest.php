@@ -84,7 +84,7 @@ class AuthControllerTest extends TestCase
         $token = JWTAuth::fromUser($user);
 
         $response = $this->getJson('/api/auth/me', [
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ]);
 
         $response->assertStatus(200)
@@ -100,7 +100,7 @@ class AuthControllerTest extends TestCase
         $token = JWTAuth::fromUser($user);
 
         $response = $this->postJson('/api/auth/logout', [], [
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ]);
 
         $response->assertStatus(200)
@@ -113,7 +113,7 @@ class AuthControllerTest extends TestCase
         $token = JWTAuth::fromUser($user);
 
         $response = $this->postJson('/api/auth/refresh', [], [
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ]);
 
         $response->assertStatus(200)

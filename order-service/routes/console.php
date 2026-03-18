@@ -1,5 +1,5 @@
 <?php
 
-    use App\Jobs\PublishOutboxJob;
+use App\Jobs\PublishOutboxJob;
 
-    Schedule::job(new PublishOutboxJob)->everySecond();
+Schedule::job(new PublishOutboxJob)->everySecond();

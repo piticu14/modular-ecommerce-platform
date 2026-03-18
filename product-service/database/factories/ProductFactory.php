@@ -14,12 +14,12 @@ class ProductFactory extends Factory
         return [
             'uuid' => fake()->uuid(),
             'name' => fake()->randomElement([
-                    'iPhone',
-                    'MacBook',
-                    'AirPods',
-                    'Samsung Galaxy',
-                    'PlayStation',
-                ]) . ' ' . fake()->numberBetween(1,20),
+                'iPhone',
+                'MacBook',
+                'AirPods',
+                'Samsung Galaxy',
+                'PlayStation',
+            ]).' '.fake()->numberBetween(1, 20),
             'price' => fake()->numberBetween(10000, 5000000),
             'currency' => 'CZK',
             'stock_on_hand' => fake()->numberBetween(10, 500),

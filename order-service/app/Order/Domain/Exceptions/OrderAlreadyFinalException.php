@@ -1,10 +1,7 @@
 <?php
 
+namespace App\Order\Domain\Exceptions;
 
-    namespace App\Order\Domain\Exceptions;
+use RuntimeException;
 
-    use RuntimeException;
-
-    class OrderAlreadyFinalException extends RuntimeException
-    {
-    }
+class OrderAlreadyFinalException extends RuntimeException {}

@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Support\Scramble\Extensions\JwtSecurityExtension;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
@@ -37,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
             if (app()->environment('testing')) {
                 return Limit::none();
             }
+
             return Limit::perMinute(60)->by(
                 $request->ip()
             );

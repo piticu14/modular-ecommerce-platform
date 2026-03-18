@@ -24,7 +24,7 @@ return new class extends Migration
             $table->enum('status', [
                 'reserved',
                 'released',
-                'failed'
+                'failed',
             ])->default('reserved');
 
             $table->uuid('event_id')->nullable();

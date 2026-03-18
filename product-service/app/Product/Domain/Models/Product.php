@@ -1,74 +1,72 @@
 <?php
 
-    namespace App\Product\Domain\Models;
+namespace App\Product\Domain\Models;
 
-    use App\Order\Domain\Models\Order;
-    use App\Product\Domain\Enums\ProductStatus;
-    use App\Product\Domain\Exceptions\ProductAlreadyArchivedException;
-    use App\Stock\Domain\Models\StockReservation;
-    use Database\Factories\ProductFactory;
-    use Illuminate\Database\Eloquent\Factories\HasFactory;
-    use Illuminate\Database\Eloquent\Model;
-    use Illuminate\Database\Eloquent\Relations\HasMany;
-    use Illuminate\Support\Str;
+use App\Product\Domain\Enums\ProductStatus;
+use App\Product\Domain\Exceptions\ProductAlreadyArchivedException;
+use App\Stock\Domain\Models\StockReservation;
+use Database\Factories\ProductFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
-    class Product extends Model
+class Product extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'uuid',
+        'name',
+        'price',
+        'currency',
+        'stock_on_hand',
+        'stock_reserved',
+        'status',
+    ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Product $product): void {
+            if (! $product->uuid) {
+                $product->uuid = (string) Str::uuid();
+            }
+        });
+    }
+
+    protected $casts = [
+        'status' => ProductStatus::class,
+    ];
+
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(StockReservation::class);
+    }
+
+    public function getStockAvailableAttribute(): int
+    {
+        return max(0, $this->stock_on_hand - $this->stock_reserved);
+    }
+
+    public function archive(): void
     {
 
-        use HasFactory;
-        protected $fillable = [
-            'uuid',
-            'name',
-            'price',
-            'currency',
-            'stock_on_hand',
-            'stock_reserved',
-            'status',
-        ];
-
-        protected static function booted(): void
-        {
-            static::creating(function (Product $product): void {
-                if (!$product->uuid) {
-                    $product->uuid = (string) Str::uuid();
-                }
-            });
+        if ($this->status->isArchived()) {
+            throw new ProductAlreadyArchivedException;
         }
 
-        protected $casts = [
-            'status' => ProductStatus::class,
-        ];
-
-        public function reservations(): HasMany
-        {
-            return $this->hasMany(StockReservation::class);
-        }
-
-        public function getStockAvailableAttribute(): int
-        {
-            return max(0, $this->stock_on_hand - $this->stock_reserved);
-        }
-
-        public function archive(): void
-        {
-
-            if ($this->status->isArchived()) {
-                throw new ProductAlreadyArchivedException();
-            }
-
-            $this->update([
-                'status' => ProductStatus::ARCHIVED
-            ]);
-        }
-
-        public function getRouteKeyName(): string
-        {
-            return 'uuid';
-        }
-
-
-        protected static function newFactory()
-        {
-            return ProductFactory::new();
-        }
+        $this->update([
+            'status' => ProductStatus::ARCHIVED,
+        ]);
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
+
+    protected static function newFactory()
+    {
+        return ProductFactory::new();
+    }
+}

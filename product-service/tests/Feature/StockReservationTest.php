@@ -3,10 +3,10 @@
 namespace Tests\Feature;
 
 use App\Messaging\Consumers\OrderCreatedHandler;
-use App\Product\Domain\Models\Product;
-use App\Stock\Domain\Models\StockReservation;
 use App\Messaging\Infrastructure\Models\OutboxEvent;
 use App\Messaging\Infrastructure\Models\ProcessedEvent;
+use App\Product\Domain\Models\Product;
+use App\Stock\Domain\Models\StockReservation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -36,9 +36,9 @@ class StockReservationTest extends TestCase
                         'product_uuid' => $product->uuid,
                         'order_item_uuid' => $orderItemUuid,
                         'quantity' => 3,
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
 
         /** @var OrderCreatedHandler $handler */
@@ -93,9 +93,9 @@ class StockReservationTest extends TestCase
                         'product_uuid' => $product->uuid,
                         'order_item_uuid' => $orderItemUuid,
                         'quantity' => 5, // more than 2
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
 
         /** @var OrderCreatedHandler $handler */
@@ -136,9 +136,9 @@ class StockReservationTest extends TestCase
                         'product_uuid' => $product->uuid,
                         'order_item_uuid' => (string) Str::uuid(),
                         'quantity' => 1,
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
 
         /** @var OrderCreatedHandler $handler */

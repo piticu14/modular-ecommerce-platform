@@ -22,6 +22,7 @@ class ProductIndexRequest extends FormRequest
         return [
             /**
              * Comma-separated list of product IDs (UUIDs) to filter by.
+             *
              * @example 9a2e88a5-0000-0000-0000-000000000000
              */
             'ids' => ['nullable', 'string'],

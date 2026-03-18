@@ -26,7 +26,7 @@ class OrderResource extends JsonResource
                     'currency' => 'CZK',
                     'quantity' => 2,
                     'line_total' => 19998,
-                ]
+                ],
             ]),
             'created_at' => (string) ($this->resource['created_at'] ?? now()->toIso8601String()),
         ];

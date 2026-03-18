@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Database\Factories;
 
 use App\Order\Domain\Models\Order;
@@ -42,12 +41,12 @@ class OrderFactory extends Factory
                     'order_id' => $order->id,
                     'product_uuid' => fake()->uuid(),
                     'product_name' => fake()->randomElement([
-                            'iPhone',
-                            'MacBook',
-                            'AirPods',
-                            'Samsung Galaxy',
-                            'PlayStation',
-                        ]) . ' ' . fake()->numberBetween(1,20),
+                        'iPhone',
+                        'MacBook',
+                        'AirPods',
+                        'Samsung Galaxy',
+                        'PlayStation',
+                    ]).' '.fake()->numberBetween(1, 20),
                     'unit_price' => $price,
                     'currency' => 'CZK',
                     'quantity' => $qty,

@@ -1,33 +1,33 @@
 <?php
 
-    namespace App\Console\Commands;
+namespace App\Console\Commands;
 
-    use Illuminate\Console\Command;
-    use RabbitTopology;
-    use Symfony\Component\Console\Command\Command as CommandAlias;
+use App\Messaging\Topology\RabbitTopology;
+use Illuminate\Console\Command;
+use Symfony\Component\Console\Command\Command as CommandAlias;
 
-    class RabbitSetup extends Command
+class RabbitSetup extends Command
+{
+    protected $signature = 'rabbit:setup';
+
+    protected $description = 'Create RabbitMQ topology';
+
+    public function handle(RabbitTopology $topology)
     {
-        protected $signature = 'rabbit:setup';
+        try {
 
-        protected $description = 'Create RabbitMQ topology';
+            $topology->declare();
 
-        public function handle(RabbitTopology $topology)
-        {
-            try {
+            $this->info('RabbitMQ topology created or already exists.');
 
-                $topology->declare();
+            return CommandAlias::SUCCESS;
 
-                $this->info('RabbitMQ topology created or already exists.');
+        } catch (\Throwable $e) {
 
-                return CommandAlias::SUCCESS;
+            $this->error('RabbitMQ topology setup failed.');
+            $this->error($e->getMessage());
 
-            } catch (\Throwable $e) {
-
-                $this->error('RabbitMQ topology setup failed.');
-                $this->error($e->getMessage());
-
-                return Command::FAILURE;
-            }
+            return CommandAlias::FAILURE;
         }
     }
+}

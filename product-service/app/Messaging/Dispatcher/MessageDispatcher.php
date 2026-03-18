@@ -1,43 +1,42 @@
 <?php
 
-    namespace App\Messaging\Dispatcher;
+namespace App\Messaging\Dispatcher;
 
-    use App\Messaging\Consumers\OrderCreatedHandler;
-    use Illuminate\Support\Facades\Redis;
+use App\Messaging\Consumers\OrderCreatedHandler;
+use Illuminate\Support\Facades\Redis;
 
-    class MessageDispatcher
+class MessageDispatcher
+{
+    protected array $handlers = [
+        'OrderCreated' => [
+            OrderCreatedHandler::class,
+        ],
+    ];
+
+    public function dispatch(array $event): void
     {
-        protected array $handlers = [
-            'OrderCreated' => [
-                OrderCreatedHandler::class,
-            ],
-        ];
+        $eventId = $event['event_id'] ?? null;
 
-        public function dispatch(array $event): void
-        {
-            $eventId = $event['event_id'] ?? null;
+        if (! $eventId) {
+            return;
+        }
 
-            if (!$eventId) {
-                return;
-            }
+        $redisKey = "event:$eventId";
 
-            $redisKey = "event:$eventId";
+        if (! Redis::setnx($redisKey, 1)) {
+            return;
+        }
 
+        Redis::expire($redisKey, 86400);
 
-            if (!Redis::setnx($redisKey, 1)) {
-                return;
-            }
+        $eventType = $event['event_type'] ?? null;
 
-            Redis::expire($redisKey, 86400);
+        if (! $eventType || ! isset($this->handlers[$eventType])) {
+            return;
+        }
 
-            $eventType = $event['event_type'] ?? null;
-
-            if (!$eventType || !isset($this->handlers[$eventType])) {
-                return;
-            }
-
-            foreach ($this->handlers[$eventType] as $handler) {
-                app($handler)->handle($event);
-            }
+        foreach ($this->handlers[$eventType] as $handler) {
+            app($handler)->handle($event);
         }
     }
+}

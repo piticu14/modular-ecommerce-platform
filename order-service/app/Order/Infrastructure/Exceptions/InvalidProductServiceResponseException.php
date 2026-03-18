@@ -1,9 +1,7 @@
 <?php
 
-    namespace App\Order\Infrastructure\Exceptions;
+namespace App\Order\Infrastructure\Exceptions;
 
-    use RuntimeException;
+use RuntimeException;
 
-    final class InvalidProductServiceResponseException extends RuntimeException
-    {
-    }
+final class InvalidProductServiceResponseException extends RuntimeException {}

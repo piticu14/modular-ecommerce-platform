@@ -1,13 +1,13 @@
 <?php
 
-    namespace App\Order\Infrastructure\Exceptions;
+namespace App\Order\Infrastructure\Exceptions;
 
-    use RuntimeException;
+use RuntimeException;
 
-    final class ProductNotFoundException extends RuntimeException
+final class ProductNotFoundException extends RuntimeException
+{
+    public function __construct(string $productUuid)
     {
-        public function __construct(string $productUuid)
-        {
-            parent::__construct("Product {$productUuid} was not found in ProductService.");
-        }
+        parent::__construct("Product {$productUuid} was not found in ProductService.");
     }
+}

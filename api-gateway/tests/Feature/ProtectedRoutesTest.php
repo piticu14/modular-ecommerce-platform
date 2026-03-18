@@ -14,8 +14,9 @@ class ProtectedRoutesTest extends TestCase
         $payload = [
             'sub' => '123',
             'iat' => time() - ($expired ? 7200 : 0),
-            'exp' => time() + ($expired ? -3600 : 3600)
+            'exp' => time() + ($expired ? -3600 : 3600),
         ];
+
         return JWT::encode($payload, $secret, 'HS256');
     }
 
@@ -28,11 +29,11 @@ class ProtectedRoutesTest extends TestCase
     public function test_orders_route_accepts_valid_token()
     {
         Http::fake([
-            'http://order-nginx/api/orders*' => Http::response([], 200)
+            'http://order-nginx/api/orders*' => Http::response([], 200),
         ]);
 
         $token = $this->createToken();
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/orders');
 
         $response->assertStatus(200);
@@ -47,11 +48,11 @@ class ProtectedRoutesTest extends TestCase
     public function test_products_route_accepts_valid_token()
     {
         Http::fake([
-            'http://product-nginx/api/products*' => Http::response([], 200)
+            'http://product-nginx/api/products*' => Http::response([], 200),
         ]);
 
         $token = $this->createToken();
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/products');
 
         $response->assertStatus(200);

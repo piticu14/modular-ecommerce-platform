@@ -2,17 +2,19 @@
 
 namespace Tests;
 
+use App\Support\InternalRequestSigner;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Testing\TestResponse;
 
 abstract class TestCase extends BaseTestCase
 {
-    protected function signedRequest(string $method, string $uri, array $data = [], int $userId = 1): \Illuminate\Testing\TestResponse
+    protected function signedRequest(string $method, string $uri, array $data = [], int $userId = 1): TestResponse
     {
         $timestamp = (string) now()->timestamp;
         $correlationId = 'test-correlation-id';
-        $path = '/' . ltrim($uri, '/');
+        $path = '/'.ltrim($uri, '/');
 
-        $signature = \App\Support\InternalRequestSigner::sign(
+        $signature = InternalRequestSigner::sign(
             method: $method,
             path: $path,
             userId: (string) $userId,

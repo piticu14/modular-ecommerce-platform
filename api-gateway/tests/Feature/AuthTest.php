@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use Firebase\JWT\JWT;
-use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -12,7 +11,7 @@ class AuthTest extends TestCase
     {
         $response = $this->postJson('/api/auth/register', [
             'name' => 'Test User',
-            'email' => 'test' . rand() . '@example.com',
+            'email' => 'test'.rand().'@example.com',
             'password' => 'password',
         ]);
 
@@ -35,11 +34,11 @@ class AuthTest extends TestCase
         $payload = [
             'sub' => '123',
             'iat' => time(),
-            'exp' => time() + 3600
+            'exp' => time() + 3600,
         ];
         $token = JWT::encode($payload, $secret, 'HS256');
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/products');
 
         // Should at least pass middleware and be proxied (e.g. 200 or 503)
@@ -52,11 +51,11 @@ class AuthTest extends TestCase
         $payload = [
             'sub' => '123',
             'iat' => time() - 7200,
-            'exp' => time() - 3600
+            'exp' => time() - 3600,
         ];
         $token = JWT::encode($payload, $secret, 'HS256');
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/products');
 
         $response->assertStatus(401)

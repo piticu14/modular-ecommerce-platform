@@ -1,45 +1,45 @@
 <?php
 
-    namespace App\Models;
+namespace App\Models;
 
-    use Illuminate\Foundation\Auth\User as Authenticatable;
-    use Tymon\JWTAuth\Contracts\JWTSubject;
-    use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-    class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable implements JWTSubject
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+    ];
+
+    protected $hidden = [
+        'password',
+    ];
+
+    protected function casts(): array
     {
-        use HasFactory;
-
-        protected $fillable = [
-            'name',
-            'email',
-            'password',
+        return [
+            'password' => 'hashed',
         ];
-
-        protected $hidden = [
-            'password',
-        ];
-
-        protected function casts(): array
-        {
-            return [
-                'password' => 'hashed',
-            ];
-        }
-
-        /**
-         * Return the identifier stored in the JWT token.
-         */
-        public function getJWTIdentifier()
-        {
-            return $this->getKey();
-        }
-
-        /**
-         * Custom claims added to JWT.
-         */
-        public function getJWTCustomClaims(): array
-        {
-            return [];
-        }
     }
+
+    /**
+     * Return the identifier stored in the JWT token.
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Custom claims added to JWT.
+     */
+    public function getJWTCustomClaims(): array
+    {
+        return [];
+    }
+}

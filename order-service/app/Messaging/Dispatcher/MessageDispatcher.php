@@ -1,47 +1,47 @@
 <?php
 
-    namespace App\Messaging\Dispatcher;
+namespace App\Messaging\Dispatcher;
 
-    use App\Messaging\Consumers\StockFailedHandler;
-    use App\Messaging\Consumers\StockReservedHandler;
-    use Illuminate\Support\Facades\Redis;
+use App\Messaging\Consumers\StockFailedHandler;
+use App\Messaging\Consumers\StockReservedHandler;
+use Illuminate\Support\Facades\Redis;
 
-    class MessageDispatcher
+class MessageDispatcher
+{
+    protected array $handlers = [
+        'StockReserved' => [
+            StockReservedHandler::class,
+        ],
+        'StockFailed' => [
+            StockFailedHandler::class,
+        ],
+    ];
+
+    public function dispatch(array $event): void
     {
-        protected array $handlers = [
-            'StockReserved' => [
-                StockReservedHandler::class,
-            ],
-            'StockFailed' => [
-                StockFailedHandler::class,
-            ],
-        ];
+        $eventId = $event['event_id'] ?? null;
 
-        public function dispatch(array $event): void
-        {
-            $eventId = $event['event_id'] ?? null;
+        if (! $eventId) {
+            return;
+        }
 
-            if (!$eventId) {
-                return;
-            }
+        $redisKey = "event:$eventId";
 
-            $redisKey = "event:$eventId";
+        // FAST duplicate filter
+        if (! Redis::setnx($redisKey, 1)) {
+            return;
+        }
 
-            // FAST duplicate filter
-            if (!Redis::setnx($redisKey, 1)) {
-                return;
-            }
+        Redis::expire($redisKey, 86400);
 
-            Redis::expire($redisKey, 86400);
+        $eventType = $event['event_type'] ?? null;
 
-            $eventType = $event['event_type'] ?? null;
+        if (! $eventType || ! isset($this->handlers[$eventType])) {
+            return;
+        }
 
-            if (!$eventType || !isset($this->handlers[$eventType])) {
-                return;
-            }
-
-            foreach ($this->handlers[$eventType] as $handler) {
-                app($handler)->handle($event);
-            }
+        foreach ($this->handlers[$eventType] as $handler) {
+            app($handler)->handle($event);
         }
     }
+}

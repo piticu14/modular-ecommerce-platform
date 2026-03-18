@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use App\Product\Domain\Models\Product;
 use App\Product\Domain\Enums\ProductStatus;
+use App\Product\Domain\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ProductControllerTest extends TestCase
 {
-    use RefreshDatabase, \Illuminate\Foundation\Testing\WithoutMiddleware;
+    use \Illuminate\Foundation\Testing\WithoutMiddleware, RefreshDatabase;
 
     public function test_can_list_active_products()
     {

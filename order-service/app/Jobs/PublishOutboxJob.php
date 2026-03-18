@@ -24,7 +24,7 @@ class PublishOutboxJob implements ShouldQueue
                 $publisher->publish($event);
 
                 $event->update([
-                    'published_at' => now()
+                    'published_at' => now(),
                 ]);
 
             } catch (\Throwable $e) {
