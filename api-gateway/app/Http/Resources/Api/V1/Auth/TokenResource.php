@@ -4,12 +4,14 @@ namespace App\Http\Resources\Api\V1\Auth;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Override;
 
 class TokenResource extends JsonResource
 {
     /**
      * @return array{access_token: string, token_type: string, expires_in: int}
      */
+    #[Override]
     public function toArray(Request $request): array
     {
 

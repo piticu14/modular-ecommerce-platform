@@ -26,12 +26,13 @@ class ProductServiceClient
             return [];
         }
 
-        try {
-            $baseUrl = config('services.product_service.base_url');
+        $baseUrl = config('services.product_service.base_url');
 
-            if (! is_string($baseUrl) || $baseUrl === '') {
-                throw new \RuntimeException('Product service Base url is not configured.');
-            }
+        if (! is_string($baseUrl) || $baseUrl === '') {
+            throw new \RuntimeException('Product service Base url is not configured.');
+        }
+
+        try {
 
             $response = InternalHttp::get(
                 $baseUrl,
@@ -45,7 +46,7 @@ class ProductServiceClient
 
             Log::error('ProductService connection failed', [
                 'message' => $e->getMessage(),
-                'url' => $baseUrl . '/api/products/by-uuid',
+                'url' => $baseUrl.'/api/v1/products/by-uuid',
             ]);
 
             throw new ProductServiceUnavailableException(
@@ -56,9 +57,9 @@ class ProductServiceClient
         } catch (RequestException $e) {
 
             Log::error('ProductService returned error response', [
-                'status' => $e->response?->status(),
-                'body' => $e->response?->body(),
-                'url' => $baseUrl . '/api/products/by-uuid',
+                'status' => $e->response->status(),
+                'body' => $e->response->body(),
+                'url' => $baseUrl.'/api/products/by-uuid',
             ]);
 
             throw new InvalidProductServiceResponseException(
@@ -81,10 +82,6 @@ class ProductServiceClient
          *     name:string,
          *     price:int,
          *     currency:string,
-         *     status:string,
-         *     stock_on_hand:int,
-         *     stock_reserved:int,
-         *     stock_available:int,
          * }> $products
          */
         $products = $rawData;

@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api\V1\Product;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Override;
 
 class ProductResource extends JsonResource
 {
@@ -21,6 +22,7 @@ class ProductResource extends JsonResource
      *     updated_at: string
      * }
      */
+    #[Override]
     public function toArray(Request $request): array
     {
         // Scramble (docs)

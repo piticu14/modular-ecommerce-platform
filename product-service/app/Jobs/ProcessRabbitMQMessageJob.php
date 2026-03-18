@@ -4,14 +4,26 @@ namespace App\Jobs;
 
 use App\Messaging\Dispatcher\MessageDispatcher;
 use Illuminate\Support\Facades\Log;
+use Override;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob as BaseJob;
 
 class ProcessRabbitMQMessageJob extends BaseJob
 {
     private const MAX_RETRIES = 5;
 
+    #[Override]
     public function fire()
     {
+        /** @var array{
+         *  event_id: string,
+         *  event_type: string,
+         *  event_version: int,
+         *  source: string,
+         *  occurred_at: string,
+         *  correlation_id: string|null,
+         *  data: array<string, mixed>
+         * } $payload
+         */
         $payload = $this->payload();
 
         try {
@@ -27,7 +39,7 @@ class ProcessRabbitMQMessageJob extends BaseJob
             Log::warning('RabbitMQ retry attempt', [
                 'attempt' => $attempt,
                 'max_retries' => self::MAX_RETRIES,
-                'event_id' => $payload['event_id'] ?? null,
+                'event_id' => $payload['event_id'],
                 'error' => $e->getMessage(),
             ]);
 
@@ -65,6 +77,7 @@ class ProcessRabbitMQMessageJob extends BaseJob
         return $data['x-death'][0]['count'] ?? 0;
     }
 
+    #[Override]
     public function getName(): string
     {
         return 'rabbitmq.raw.message';

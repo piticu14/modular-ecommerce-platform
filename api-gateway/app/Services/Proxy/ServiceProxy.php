@@ -30,13 +30,14 @@ class ServiceProxy
                     'X-Correlation-ID' => $request->header('X-Correlation-ID'),
                     'Accept' => $request->header('Accept', 'application/json'),
                     'Content-Type' => $request->header('Content-Type', 'application/json'),
-                    'Idempotency-Key' => $idempotencyKey
+                    'Idempotency-Key' => $idempotencyKey,
                 ]);
 
                 if ($config['signed']) {
                     $headers = $this->signHeaders($request, $headers);
                 }
 
+                /** @var Response $response */
                 $response = Http::timeout($config['timeout'])
                     ->withHeaders($headers)
                     ->send(
@@ -69,7 +70,6 @@ class ServiceProxy
             $config['retry_sleep']
         );
     }
-
 
     private function resolveUrl(Request $request, array $config): string
     {

@@ -10,24 +10,30 @@
     cacheDirectory="/tmp/psalm"
 >
     <projectFiles>
-        <directory name="app"/>
+        <directory name="app" />
+        <directory name="routes" />
+
         <ignoreFiles>
-            <directory name="vendor"/>
+            <directory name="vendor" />
+            <directory name="storage" />
+            <directory name="bootstrap/cache" />
         </ignoreFiles>
     </projectFiles>
     <issueHandlers>
-        <UnusedClass>
+        <UnusedClass errorLevel="info">
             <errorLevel type="suppress">
+                <directory name="app/Http/Middleware"/>
                 <directory name="app/Http/Controllers"/>
             </errorLevel>
         </UnusedClass>
-        <PossiblyUnusedMethod>
+        <PossiblyUnusedMethod errorLevel="info">
             <errorLevel type="suppress">
                 <directory name="app/Http/Controllers"/>
+                <directory name="app/Http/Requests"/>
             </errorLevel>
         </PossiblyUnusedMethod>
     </issueHandlers>
     <plugins>
-        <pluginClass class="Psalm\LaravelPlugin\Plugin"/>
+        <pluginClass class="Psalm\LaravelPlugin\Plugin" />
     </plugins>
 </psalm>

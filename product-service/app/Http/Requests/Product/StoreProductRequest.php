@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Product;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Override;
 
 class StoreProductRequest extends FormRequest
 {
@@ -16,6 +17,7 @@ class StoreProductRequest extends FormRequest
         ];
     }
 
+    #[Override]
     public function messages(): array
     {
         return [
@@ -25,6 +27,7 @@ class StoreProductRequest extends FormRequest
         ];
     }
 
+    #[Override]
     protected function prepareForValidation(): void
     {
         $currency = $this->input('currency');

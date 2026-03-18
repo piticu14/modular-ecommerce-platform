@@ -9,12 +9,11 @@ use Throwable;
 
 final class InternalHttp
 {
-    public static function request(
+    private static function request(
         string $method,
         string $baseUrl,
         string $path,
-        array $query = [],
-        array $body = []
+
     ): PendingRequest {
 
         $timestamp = (string) now()->timestamp;
@@ -47,19 +46,19 @@ final class InternalHttp
             ->timeout(2)
             ->connectTimeout(1)
             ->retry(2, 150, fn (Throwable $e) => $e instanceof ConnectionException)
-            ->withHeaders($headers)
-            ->when($body !== [], fn ($http) => $http->asJson());
+            ->withHeaders($headers);
     }
 
     public static function get(string $baseUrl, string $path, array $query = [])
     {
-        return self::request('GET', $baseUrl, $path, $query)
+        return self::request('GET', $baseUrl, $path)
             ->get($path, $query);
     }
 
     public static function post(string $baseUrl, string $path, array $body = [])
     {
-        return self::request('POST', $baseUrl, $path, [], $body)
+        return self::request('POST', $baseUrl, $path)
+            ->asJson()
             ->post($path, $body);
     }
 }

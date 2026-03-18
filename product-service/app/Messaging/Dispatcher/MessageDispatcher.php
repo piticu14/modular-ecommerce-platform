@@ -15,8 +15,8 @@ class MessageDispatcher
 
     /**
      * @param array{
-     *     event_id: string,
-     *     event_type: string,
+     *     event_id?: string,
+     *     event_type?: string,
      *     event_version: int,
      *     source: string,
      *     occurred_at: string,
@@ -28,7 +28,7 @@ class MessageDispatcher
      */
     public function dispatch(array $event): void
     {
-        $eventId = $event['event_id'] ?? null;
+        $eventId = $event['event_id'];
 
         if (! $eventId) {
             return;
@@ -37,14 +37,16 @@ class MessageDispatcher
         $redisKey = "event:$eventId";
 
         // Atomic deduplication (SET NX EX)
-        $ok = Redis::set($redisKey, 1, 'EX', 86400, 'NX');
+        $ok = Redis::set($redisKey, 1, [
+            'nx',
+            'ex' => 86400,
+        ]);
 
         if (! $ok) {
             return;
         }
 
-
-        $eventType = $event['event_type'] ?? null;
+        $eventType = $event['event_type'];
 
         if (! $eventType || ! isset($this->handlers[$eventType])) {
             return;

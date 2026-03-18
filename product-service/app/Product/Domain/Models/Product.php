@@ -10,9 +10,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Override;
 
+/**
+ * @property string $uuid,
+ * @property string $name,
+ * @property int $price,
+ * @property string $currency,
+ * @property int $stock_on_hand,
+ * @property int $stock_reserved,
+ * @property ProductStatus $status,
+ */
 class Product extends Model
 {
+    /**
+     * @use HasFactory<ProductFactory>
+     */
     use HasFactory;
 
     protected $fillable = [
@@ -25,6 +38,7 @@ class Product extends Model
         'status',
     ];
 
+    #[Override]
     protected static function booted(): void
     {
         static::creating(function (Product $product): void {
@@ -60,6 +74,7 @@ class Product extends Model
         ]);
     }
 
+    #[Override]
     public function getRouteKeyName(): string
     {
         return 'uuid';

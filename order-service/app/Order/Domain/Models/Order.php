@@ -9,9 +9,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Override;
 
+/**
+ * @property string $uuid,
+ * @property int $user_id,
+ * @property OrderStatus $status,
+ * @property string $currency,
+ * @property int $subtotal,
+ * @property int $total,
+ */
 class Order extends Model
 {
+    /**
+     * @use HasFactory<OrderFactory>
+     */
     use HasFactory;
 
     protected $fillable = [
@@ -27,6 +39,7 @@ class Order extends Model
         'status' => OrderStatus::class,
     ];
 
+    #[Override]
     protected static function booted(): void
     {
         static::creating(function (Order $order): void {
@@ -47,7 +60,7 @@ class Order extends Model
     public function cancel(): void
     {
         $updated = $this->newQuery()
-            ->where('id', $this->id)
+            ->where('id', $this->getKey())
             ->where('status', OrderStatus::PENDING)
             ->update([
                 'status' => OrderStatus::CANCELLED,
@@ -60,6 +73,7 @@ class Order extends Model
         $this->status = OrderStatus::CANCELLED;
     }
 
+    #[Override]
     public function getRouteKeyName(): string
     {
         return 'uuid';

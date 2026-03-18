@@ -27,11 +27,15 @@ class OrderCreatedPayload extends EventPayload
             $correlationId,
             [
                 'order_uuid' => $order->uuid,
-                'items' => $items->map(fn (OrderItem $item) => [
-                    'order_item_uuid' => $item->uuid,
-                    'product_uuid' => $item->product_uuid,
-                    'quantity' => $item->quantity,
-                ])->values()->all(),
+                'items' => $items
+                    ->toBase()
+                    ->map(fn (OrderItem $item) => [
+                        'order_item_uuid' => $item->uuid,
+                        'product_uuid' => $item->product_uuid,
+                        'quantity' => $item->quantity,
+                    ])
+                    ->values()
+                    ->all(),
                 'total' => $order->total,
             ]
         );

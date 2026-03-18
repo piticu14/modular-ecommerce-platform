@@ -67,7 +67,7 @@ readonly class CreateOrderAction
 
                 $product = $products[$item->productUuid] ?? null;
 
-                $unitPrice = (int) $product->price;
+                $unitPrice = $product->price;
 
                 $lineTotal = $unitPrice * $item->quantity;
 

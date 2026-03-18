@@ -6,7 +6,6 @@ use App\Support\InternalRequestSigner;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Redis;
 use Symfony\Component\HttpFoundation\Response;
 
 final class VerifyInternalSignature
@@ -66,11 +65,11 @@ final class VerifyInternalSignature
         }
 
         // replay protection (atomicky)
-        $cacheKey = 'nonce:' . $nonce;
+        $cacheKey = 'nonce:'.$nonce;
 
         $ok = Cache::add($cacheKey, 1, now()->addSeconds(300));
 
-        if (!$ok) {
+        if (! $ok) {
             abort(409, 'Duplicate request detected.');
         }
 

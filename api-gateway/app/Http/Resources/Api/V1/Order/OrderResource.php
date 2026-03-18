@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api\V1\Order;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Override;
 
 class OrderResource extends JsonResource
 {
@@ -25,6 +26,7 @@ class OrderResource extends JsonResource
      *     created_at: string
      * }
      */
+    #[Override]
     public function toArray(Request $request): array
     {
 

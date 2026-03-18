@@ -2,12 +2,17 @@
 
 namespace App\Models;
 
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Override;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
+    /**
+     * @use HasFactory<UserFactory>
+     */
     use HasFactory;
 
     protected $fillable = [
@@ -20,6 +25,7 @@ class User extends Authenticatable implements JWTSubject
         'password',
     ];
 
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -30,6 +36,7 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Return the identifier stored in the JWT token.
      */
+    #[Override]
     public function getJWTIdentifier()
     {
         return $this->getKey();
@@ -38,6 +45,7 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Custom claims added to JWT.
      */
+    #[Override]
     public function getJWTCustomClaims(): array
     {
         return [];

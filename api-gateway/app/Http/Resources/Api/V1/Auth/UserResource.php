@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api\V1\Auth;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Override;
 
 class UserResource extends JsonResource
 {
@@ -16,6 +17,7 @@ class UserResource extends JsonResource
      *     updated_at: string
      * }
      */
+    #[Override]
     public function toArray(Request $request): array
     {
         // Scramble (docs)

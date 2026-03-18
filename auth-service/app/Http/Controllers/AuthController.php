@@ -27,9 +27,7 @@ class AuthController extends Controller
             'password' => $data['password'],
         ]);
 
-        return response()->json([
-            'message' => 'User created',
-        ], 201);
+        return response()->json($user, 201);
     }
 
     /**

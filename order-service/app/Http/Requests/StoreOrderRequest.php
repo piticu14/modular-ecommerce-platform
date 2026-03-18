@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Override;
 
 class StoreOrderRequest extends FormRequest
 {
@@ -15,6 +16,7 @@ class StoreOrderRequest extends FormRequest
         ];
     }
 
+    #[Override]
     public function messages(): array
     {
         return [
