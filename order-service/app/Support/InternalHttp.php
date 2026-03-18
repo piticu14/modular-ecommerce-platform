@@ -18,14 +18,20 @@ final class InternalHttp
     ): PendingRequest {
 
         $timestamp = (string) now()->timestamp;
+        $secret = config('services.internal.token');
+
+        if (! is_string($secret) || $secret === '') {
+            throw new \RuntimeException('Internal token is not configured');
+        }
 
         $signature = InternalRequestSigner::sign(
             method: $method,
             path: $path,
             userId: (string) RequestContext::userId(),
             correlationId: (string) RequestContext::correlationId(),
+            nonce: (string) RequestContext::correlationId(),
             timestamp: $timestamp,
-            secret: config('services.internal.token')
+            secret: $secret
         );
 
         $headers = [

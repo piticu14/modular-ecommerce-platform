@@ -23,6 +23,10 @@ class Order extends Model
         'total',
     ];
 
+    protected $casts = [
+        'status' => OrderStatus::class,
+    ];
+
     protected static function booted(): void
     {
         static::creating(function (Order $order): void {
@@ -32,6 +36,9 @@ class Order extends Model
         });
     }
 
+    /**
+     * @return HasMany<OrderItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
@@ -47,7 +54,7 @@ class Order extends Model
             ]);
 
         if ($updated === 0) {
-            throw new OrderAlreadyFinalException;
+            throw new OrderAlreadyFinalException('Order cannot be cancelled.');
         }
 
         $this->status = OrderStatus::CANCELLED;

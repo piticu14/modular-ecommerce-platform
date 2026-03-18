@@ -14,11 +14,12 @@ use Illuminate\Support\Facades\Log;
 class ProductServiceClient
 {
     /**
-     * @param  array<int,int>  $ids
-     * @return array<int,ProductSnapshot>
+     * @param  array<int,string>  $uuids
+     * @return array<string,ProductSnapshot>
      */
     public function getProductsByUuid(array $uuids): array
     {
+
         $uuids = array_values(array_unique($uuids));
 
         if ($uuids === []) {
@@ -26,32 +27,67 @@ class ProductServiceClient
         }
 
         try {
+            $baseUrl = config('services.product_service.base_url');
+
+            if (! is_string($baseUrl) || $baseUrl === '') {
+                throw new \RuntimeException('Product service Base url is not configured.');
+            }
 
             $response = InternalHttp::get(
-                config('services.product_service.base_url'),
-                '/api/products/by-uuid',
+                $baseUrl,
+                '/api/v1/products/by-uuid',
                 [
                     'uuids' => implode(',', $uuids),
                 ]
             )->throw();
 
-        } catch (ConnectionException|RequestException $e) {
+        } catch (ConnectionException $e) {
+
+            Log::error('ProductService connection failed', [
+                'message' => $e->getMessage(),
+                'url' => $baseUrl . '/api/products/by-uuid',
+            ]);
 
             throw new ProductServiceUnavailableException(
-                message: 'ProductService is unavailable.',
+                message: 'Product service is not reachable.',
+                previous: $e
+            );
+
+        } catch (RequestException $e) {
+
+            Log::error('ProductService returned error response', [
+                'status' => $e->response?->status(),
+                'body' => $e->response?->body(),
+                'url' => $baseUrl . '/api/products/by-uuid',
+            ]);
+
+            throw new InvalidProductServiceResponseException(
+                message: 'Product service returned invalid response.',
                 previous: $e
             );
         }
 
-        /** @var array<int,array{id:int,name:string,price:string|int|float,currency:string}> $products */
-        $products = $response->json('data', []);
+        $rawData = $response->json('data', []);
 
-        Log::info('ProductService response', ['products' => $products]);
+        Log::info('ProductService response', ['products' => $rawData]);
 
-        if (! is_array($products)) {
+        if (! is_array($rawData)) {
             throw new InvalidProductServiceResponseException('Missing or invalid data key.');
         }
 
+        /**
+         * @var array<int,array{
+         *     uuid:string,
+         *     name:string,
+         *     price:int,
+         *     currency:string,
+         *     status:string,
+         *     stock_on_hand:int,
+         *     stock_reserved:int,
+         *     stock_available:int,
+         * }> $products
+         */
+        $products = $rawData;
         $map = [];
 
         foreach ($products as $product) {

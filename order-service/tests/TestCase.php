@@ -4,6 +4,7 @@ namespace Tests;
 
 use App\Support\InternalRequestSigner;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 
 abstract class TestCase extends BaseTestCase
@@ -12,6 +13,7 @@ abstract class TestCase extends BaseTestCase
     {
         $timestamp = (string) now()->timestamp;
         $correlationId = 'test-correlation-id';
+        $nonce = Str::uuid();
         $path = '/'.ltrim($uri, '/');
 
         $signature = InternalRequestSigner::sign(
@@ -19,6 +21,7 @@ abstract class TestCase extends BaseTestCase
             path: $path,
             userId: (string) $userId,
             correlationId: $correlationId,
+            nonce: $nonce,
             timestamp: $timestamp,
             secret: config('services.internal.token')
         );

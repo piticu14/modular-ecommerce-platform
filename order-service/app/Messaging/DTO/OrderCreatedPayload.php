@@ -5,6 +5,7 @@ namespace App\Messaging\DTO;
 use App\Order\Domain\Models\Order;
 use App\Order\Domain\Models\OrderItem;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 class OrderCreatedPayload extends EventPayload
 {
@@ -15,7 +16,7 @@ class OrderCreatedPayload extends EventPayload
         string $correlationId,
     ): array {
 
-        /** @var \Illuminate\Database\Eloquent\Collection<int, OrderItem> $items */
+        /** @var Collection<int, OrderItem> $items */
         $items = $order->items;
 
         return self::envelope(

@@ -24,4 +24,5 @@ final class RequestContext
 
         return is_string($value) && $value !== '' ? $value : null;
     }
+
 }

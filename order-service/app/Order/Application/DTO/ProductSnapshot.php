@@ -7,7 +7,7 @@ final readonly class ProductSnapshot
     public function __construct(
         public string $uuid,
         public string $name,
-        public string $price,
+        public int $price,
         public string $currency,
         public string $status,
         public int $stock_on_hand,
@@ -16,14 +16,23 @@ final readonly class ProductSnapshot
     ) {}
 
     /**
-     * @param  array{id:int,uuid:string,name:string,price:string|int|float,currency:string}  $data
+     * @param array{
+     *     uuid:string,
+     *     name:string,
+     *     price:int,
+     *     currency:string,
+     *     status:string,
+     *     stock_on_hand:int,
+     *     stock_reserved:int,
+     *     stock_available:int,
+     * } $data
      */
     public static function fromArray(array $data): self
     {
         return new self(
             uuid: (string) $data['uuid'],
             name: (string) $data['name'],
-            price: (string) $data['price'],
+            price: (int) $data['price'],
             currency: (string) $data['currency'],
             status: (string) $data['status'],
             stock_on_hand: (int) $data['stock_on_hand'],

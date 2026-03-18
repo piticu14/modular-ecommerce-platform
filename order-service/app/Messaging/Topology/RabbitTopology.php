@@ -9,14 +9,15 @@ class RabbitTopology
 {
     public function declare(): void
     {
-        $config = Config::get('queue.connections.rabbitmq.hosts')[0];
+        /** @var array<int, array{host:string,port:int,user:string,password:string,vhost:string}> $config */
+        $config = Config::get('queue.connections.rabbitmq.hosts', []);
 
         $connection = new AMQPStreamConnection(
-            $config['host'],
-            $config['port'],
-            $config['user'],
-            $config['password'],
-            $config['vhost']
+            $config[0]['host'],
+            $config[0]['port'],
+            $config[0]['user'],
+            $config[0]['password'],
+            $config[0]['vhost']
         );
 
         $channel = $connection->channel();

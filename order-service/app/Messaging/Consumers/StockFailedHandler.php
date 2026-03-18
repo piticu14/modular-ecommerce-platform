@@ -3,6 +3,7 @@
 namespace App\Messaging\Consumers;
 
 use App\Messaging\Infrastructure\Models\ProcessedEvent;
+use App\Order\Domain\Enums\OrderStatus;
 use App\Order\Domain\Models\Order;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -28,12 +29,12 @@ class StockFailedHandler
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if ($order->status !== 'PENDING') {
+            if ($order->status !== OrderStatus::PENDING) {
                 return;
             }
 
             $order->update([
-                'status' => 'FAILED',
+                'status' => OrderStatus::FAILED,
             ]);
 
             ProcessedEvent::create([

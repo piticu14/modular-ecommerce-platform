@@ -7,6 +7,7 @@ use App\Messaging\Infrastructure\Models\OutboxEvent;
 use App\Order\Application\DTO\CreateOrderItemData;
 use App\Order\Application\DTO\ProductSnapshot;
 use App\Order\Application\Exceptions\OrderCreationFailedException;
+use App\Order\Domain\Enums\OrderStatus;
 use App\Order\Domain\Models\Order;
 use App\Order\Infrastructure\Clients\ProductServiceClient;
 use App\Order\Infrastructure\Exceptions\ProductServiceUnavailableException;
@@ -54,7 +55,7 @@ readonly class CreateOrderAction
 
             $order = Order::create([
                 'user_id' => $userId,
-                'status' => 'PENDING',
+                'status' => OrderStatus::PENDING,
                 'currency' => $this->resolveCurrency($items, $products),
                 'subtotal' => 0,
                 'total' => 0,
@@ -115,7 +116,7 @@ readonly class CreateOrderAction
 
     /**
      * @param  array<int, CreateOrderItemData>  $items
-     * @param  array<int, ProductSnapshot>  $products
+     * @param  array<string, ProductSnapshot>  $products
      */
     private function resolveCurrency(array $items, array $products): string
     {
