@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->append(CorrelationId::class);
+        $middleware->prepend(CorrelationId::class);
         $middleware->alias([
             'jwt' => VerifyJwt::class,
         ]);

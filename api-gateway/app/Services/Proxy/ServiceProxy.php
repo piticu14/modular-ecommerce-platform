@@ -7,6 +7,8 @@ use App\Support\RequestContext;
 use Illuminate\Http\Client\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ServiceProxy
 {
@@ -14,37 +16,60 @@ class ServiceProxy
     {
         $config = $this->getServiceConfig($service);
         $url = $this->resolveUrl($request, $config);
-        $headers = $this->forwardHeaders($request);
+        $idempotencyKey = $request->header('Idempotency-Key') ?: (string) Str::uuid();
 
-        if ($config['signed'] ?? false) {
-            $headers = $this->signHeaders($request, $headers);
-        }
+        $attempts = $config['retries'] + 1;
 
-        return Http::timeout($config['timeout'] ?? 10)
-            ->retry($config['retries'] ?? 3, $config['retry_sleep'] ?? 500)
-            ->withHeaders($headers)
-            ->send(
-                $request->method(),
-                $url,
-                [
-                    'query' => $request->query(),
-                    'json' => $request->all(),
-                ]
-            );
+        return retry(
+            $attempts,
+            function () use ($request, $config, $url, $idempotencyKey, $service) {
+                $headers = array_filter([
+                    'Authorization' => $request->header('Authorization'),
+                    'X-User-Id' => $request->header('X-User-Id'),
+                    'X-Service-Name' => config('app.name'),
+                    'X-Correlation-ID' => $request->header('X-Correlation-ID'),
+                    'Accept' => $request->header('Accept', 'application/json'),
+                    'Content-Type' => $request->header('Content-Type', 'application/json'),
+                    'Idempotency-Key' => $idempotencyKey
+                ]);
+
+                if ($config['signed']) {
+                    $headers = $this->signHeaders($request, $headers);
+                }
+
+                $response = Http::timeout($config['timeout'])
+                    ->withHeaders($headers)
+                    ->send(
+                        $request->method(),
+                        $url,
+                        [
+                            'query' => $request->query(),
+                            'json' => $request->all(),
+                        ]
+                    );
+
+                if ($response->failed()) {
+
+                    Log::error('API Gateway downstream error', [
+                        'service' => $service,
+                        'url' => $url,
+                        'method' => $request->method(),
+                        'status' => $response->status(),
+                        'body' => $response->body(),
+                        'correlation_id' => $headers['X-Correlation-ID'] ?? null,
+                    ]);
+                }
+
+                if ($response->serverError()) {
+                    throw new \Exception('Retryable error');
+                }
+
+                return $response;
+            },
+            $config['retry_sleep']
+        );
     }
 
-    private function forwardHeaders(Request $request): array
-    {
-        return array_filter([
-            'Authorization' => $request->header('Authorization'),
-            'X-User-Id' => $request->header('X-User-Id'),
-            'X-Service-Name' => config('app.name'),
-            'X-Correlation-ID' => $request->header('X-Correlation-ID'),
-            'Accept' => $request->header('Accept', 'application/json'),
-            'Content-Type' => $request->header('Content-Type', 'application/json'),
-
-        ]);
-    }
 
     private function resolveUrl(Request $request, array $config): string
     {
@@ -81,30 +106,42 @@ class ServiceProxy
         return implode('/', $segments);
     }
 
+    /**
+     * @return array{url: string, signed:bool, timeout: int, retries: int, retry_sleep: int, version_map: array<string, string>}
+     */
     private function getServiceConfig(string $service): array
     {
         $config = config("services.proxy.services.$service");
 
-        if (! $config) {
+        if (! is_array($config)) {
             abort(404, "Service [$service] is not configured.");
         }
 
+        /** @var array{url: string, signed:bool, timeout: int, retries: int, retry_sleep:int, version_map: array<string, string>} $config */
         return $config;
     }
 
     private function signHeaders(Request $request, array $headers): array
     {
         $timestamp = (string) now()->timestamp;
+        $nonce = (string) Str::uuid();
+        $secret = config('services.internal.token');
+
+        if (! is_string($secret) || $secret === '') {
+            throw new \RuntimeException('Internal token is not configured');
+        }
 
         $signature = InternalRequestSigner::sign(
             method: $request->method(),
             path: '/'.$request->path(),
             userId: (string) RequestContext::userId(),
             correlationId: (string) RequestContext::correlationId(),
+            nonce: $nonce,
             timestamp: $timestamp,
-            secret: config('services.internal.token')
+            secret: $secret
         );
 
+        $headers['X-Nonce'] = $nonce;
         $headers['X-Timestamp'] = $timestamp;
         $headers['X-Internal-Signature'] = $signature;
 

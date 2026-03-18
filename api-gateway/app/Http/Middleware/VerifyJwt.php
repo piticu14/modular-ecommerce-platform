@@ -29,9 +29,15 @@ class VerifyJwt
 
         try {
 
+            $secret = config('services.jwt.secret');
+
+            if (! is_string($secret)) {
+                throw new \RuntimeException('JWT secret is not defined or invalid.');
+            }
+
             $payload = JWT::decode(
                 $token,
-                new Key(config('services.jwt.secret'), 'HS256')
+                new Key($secret, 'HS256')
             );
 
             $request->headers->set('X-User-Id', $payload->sub);

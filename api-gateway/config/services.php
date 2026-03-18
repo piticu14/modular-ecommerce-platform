@@ -46,6 +46,7 @@ return [
                 'signed' => false,
                 'timeout' => 5,
                 'retries' => 2,
+                'retry_sleep' => 500,
                 'version_map' => [
                     'v1' => 'v1',
                 ],
@@ -55,6 +56,7 @@ return [
                 'signed' => true,
                 'timeout' => 5,
                 'retries' => 2,
+                'retry_sleep' => 500,
                 'version_map' => [
                     'v1' => 'v1',
                 ],
@@ -64,6 +66,7 @@ return [
                 'signed' => true,
                 'timeout' => 5,
                 'retries' => 2,
+                'retry_sleep' => 500,
                 'version_map' => [
                     'v1' => 'v1',
                 ],

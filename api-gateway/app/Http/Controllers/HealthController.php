@@ -8,7 +8,14 @@ class HealthController extends Controller
 {
     public function index()
     {
+        /**
+         * @var array<string, array<string, string>>
+         */
         $services = config('services.proxy.services');
+
+        if (! $services) {
+            abort(404, 'Services are not configured.');
+        }
 
         $results = [];
 

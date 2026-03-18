@@ -9,6 +9,7 @@ final class InternalRequestSigner
         string $path,
         string $userId,
         string $correlationId,
+        string $nonce,
         string $timestamp,
         string $secret
     ): string {
@@ -17,7 +18,9 @@ final class InternalRequestSigner
             $path,
             $userId,
             $correlationId,
+            $nonce,
             $timestamp,
+
         ]);
 
         return hash_hmac('sha256', $data, $secret);

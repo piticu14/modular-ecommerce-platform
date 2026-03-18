@@ -12,8 +12,20 @@ class ErrorResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
-            'message' => (string) ($this->resource['message'] ?? 'Error message'),
-        ];
+        // Scramble (docs)
+        if ($this->resource === null) {
+            return [
+                'message' => 'Error message',
+            ];
+        }
+
+        /**
+         * @var array{
+         *     message: string,
+         * } $data
+         */
+        $data = $this->resource;
+
+        return $data;
     }
 }

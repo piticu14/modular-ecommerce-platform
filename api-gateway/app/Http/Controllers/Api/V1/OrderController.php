@@ -35,7 +35,6 @@ class OrderController extends ApiController
      *
      * @authenticated
      *
-     * @param Request $request
      * @param  string  $id  Order UUID (e.g. 9a2e88a5-0000-0000-0000-000000000000)
      */
     #[DedocResponse(200, 'OK', type: OrderResource::class)]
