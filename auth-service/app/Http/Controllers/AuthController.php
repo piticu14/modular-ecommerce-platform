@@ -48,7 +48,7 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        return $this->respondWithToken($token);
+        return $this->respondWithToken((string) $token);
     }
 
     /**
@@ -86,10 +86,9 @@ class AuthController extends Controller
     /**
      * Get the token array structure.
      *
-     * @param  string  $token
      * @return JsonResponse
      */
-    protected function respondWithToken($token)
+    protected function respondWithToken(string $token)
     {
         return response()->json([
             'access_token' => $token,
