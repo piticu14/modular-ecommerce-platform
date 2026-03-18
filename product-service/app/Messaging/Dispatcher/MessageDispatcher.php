@@ -13,6 +13,19 @@ class MessageDispatcher
         ],
     ];
 
+    /**
+     * @param array{
+     *     event_id: string,
+     *     event_type: string,
+     *     event_version: int,
+     *     source: string,
+     *     occurred_at: string,
+     *     correlation_id: string|null,
+     *     data: array<string, mixed>
+     * } $event
+     *
+     * @throws \Exception
+     */
     public function dispatch(array $event): void
     {
         $eventId = $event['event_id'] ?? null;
@@ -23,11 +36,13 @@ class MessageDispatcher
 
         $redisKey = "event:$eventId";
 
-        if (! Redis::setnx($redisKey, 1)) {
+        // Atomic deduplication (SET NX EX)
+        $ok = Redis::set($redisKey, 1, 'EX', 86400, 'NX');
+
+        if (! $ok) {
             return;
         }
 
-        Redis::expire($redisKey, 86400);
 
         $eventType = $event['event_type'] ?? null;
 

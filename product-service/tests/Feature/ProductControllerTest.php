@@ -5,11 +5,12 @@ namespace Tests\Feature;
 use App\Product\Domain\Enums\ProductStatus;
 use App\Product\Domain\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Tests\TestCase;
 
 class ProductControllerTest extends TestCase
 {
-    use \Illuminate\Foundation\Testing\WithoutMiddleware, RefreshDatabase;
+    use RefreshDatabase, WithoutMiddleware;
 
     public function test_can_list_active_products()
     {

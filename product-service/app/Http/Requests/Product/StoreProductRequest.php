@@ -27,9 +27,11 @@ class StoreProductRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        if ($this->currency) {
+        $currency = $this->input('currency');
+
+        if (is_string($currency) && $currency !== '') {
             $this->merge([
-                'currency' => strtoupper($this->currency),
+                'currency' => strtoupper($currency),
             ]);
         }
     }

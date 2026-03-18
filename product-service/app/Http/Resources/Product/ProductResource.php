@@ -2,14 +2,15 @@
 
 namespace App\Http\Resources\Product;
 
+use App\Product\Domain\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Product
+ */
 class ProductResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     */
     public function toArray(Request $request): array
     {
         return [

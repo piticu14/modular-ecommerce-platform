@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureUserContext;
+use App\Http\Middleware\IdempotencyMiddleware;
 use App\Http\Middleware\VerifyInternalSignature;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'internal.signature' => VerifyInternalSignature::class,
             'user.context' => EnsureUserContext::class,
+            'idempotency' => IdempotencyMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

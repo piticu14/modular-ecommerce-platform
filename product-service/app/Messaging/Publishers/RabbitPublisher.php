@@ -26,7 +26,7 @@ class RabbitPublisher
         Log::info('Outbox event published', [
             'event_id' => $event->id,
             'event_type' => $event->event_type,
-            'occurred_at' => $event->occurred_at?->toISOString(),
+            'occurred_at' => $event->occurred_at->toISOString(),
             'correlation_id' => $event->correlation_id,
         ]);
     }

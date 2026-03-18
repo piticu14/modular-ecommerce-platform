@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Support\InternalRequestSigner;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -12,7 +13,7 @@ final class VerifyInternalSignature
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (app()->environment('testing')) {
+        if ($request->isMethodIdempotent() || app()->environment('testing')) {
             return $next($request);
         }
 
@@ -20,8 +21,15 @@ final class VerifyInternalSignature
         $correlationId = (string) $request->header('X-Correlation-ID', '');
         $timestamp = (string) $request->header('X-Timestamp', '');
         $signature = (string) $request->header('X-Internal-Signature', '');
+        $nonce = (string) $request->header('X-Nonce', '');
 
-        if ($userId === '' || $correlationId === '' || $timestamp === '' || $signature === '') {
+        if (
+            $userId === '' ||
+            $correlationId === '' ||
+            $timestamp === '' ||
+            $signature === '' ||
+            $nonce === ''
+        ) {
             abort(401, 'Missing internal signature headers.');
         }
 
@@ -34,6 +42,12 @@ final class VerifyInternalSignature
             abort(401, 'Expired internal signature.');
         }
 
+        $secret = config('services.internal.token');
+
+        if (! is_string($secret) || $secret === '') {
+            throw new \RuntimeException('Internal token is not configured');
+        }
+
         // normalizace path kvůli /orders vs /orders/
         $path = rtrim('/'.$request->path(), '/');
 
@@ -42,8 +56,9 @@ final class VerifyInternalSignature
             path: $path,
             userId: $userId,
             correlationId: $correlationId,
+            nonce: $nonce,
             timestamp: $timestamp,
-            secret: config('services.internal.token')
+            secret: $secret
         );
 
         if (! hash_equals($expectedSignature, $signature)) {
@@ -51,12 +66,12 @@ final class VerifyInternalSignature
         }
 
         // replay protection (atomicky)
-        $nonce = 'sig:'.hash('sha256', $signature.$timestamp);
+        $cacheKey = 'nonce:' . $nonce;
 
-        $ok = Redis::set($nonce, 1, 'NX', 'EX', 300);
+        $ok = Cache::add($cacheKey, 1, now()->addSeconds(300));
 
-        if (! $ok) {
-            abort(401, 'Replay attack detected.');
+        if (!$ok) {
+            abort(409, 'Duplicate request detected.');
         }
 
         return $next($request);
