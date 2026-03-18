@@ -15,6 +15,10 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
+  if (!config.headers['X-Correlation-Id']) {
+    config.headers['X-Correlation-Id'] = crypto.randomUUID();
+  }
+
   return config;
 });
 
