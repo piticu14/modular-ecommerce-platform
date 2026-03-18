@@ -39,6 +39,8 @@ class ProductController extends ApiController
      * @authenticated
      *
      * @param  string  $id  Product UUID. Example: 9a2e88a5-0000-0000-0000-000000000000
+     *
+     * @psalm-suppress PossiblyUnusedParam $id is required by route and forwarded via Request
      */
     #[DedocResponse(200, 'OK', type: ProductResource::class)]
     #[DedocResponse(401, 'Unauthorized', type: ErrorResource::class)]
@@ -94,6 +96,8 @@ class ProductController extends ApiController
      * @authenticated
      *
      * @param  string  $id  Product UUID. Example: 9a2e88a5-0000-0000-0000-000000000000
+     *
+     * @psalm-suppress PossiblyUnusedParam $id is required by route and forwarded via Request
      */
     #[DedocResponse(200, 'OK', type: StockReservationResource::class)]
     #[DedocResponse(401, 'Unauthorized', type: ErrorResource::class)]
