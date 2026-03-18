@@ -1,37 +1,100 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Exit on error
-set -e
+set -euo pipefail
 
-# Colors for output
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m'
 PROJECT_NAME="ecommerce_test"
+START_TIME=$(date +%s)
 
-echo -e "${BLUE}Starting isolated testing environment...${NC}"
+CURRENT_STEP=""
 
-# Start the stack with test overrides
-# Note: This uses the existing mysql containers but will create _test databases if they don't exist
-docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml up -d
+# ===== COLORS =====
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m'
 
-echo -e "${BLUE}Waiting for MySQL and services to be ready...${NC}"
-# Simple wait loop for mysql containers
+# ===== HELPERS =====
+print_line() {
+  printf "${BLUE}============================================================${NC}\n"
+}
+
+print_header() {
+  print_line
+  printf "${BOLD}${CYAN}%s${NC}\n" "$1"
+  print_line
+}
+
+print_step() {
+  printf "${YELLOW}→ %s${NC}\n" "$1"
+}
+
+print_success() {
+  printf "${GREEN}✓ %s${NC}\n" "$1"
+}
+
+print_error() {
+  printf "${RED}✗ %s${NC}\n" "$1"
+}
+
+format_time() {
+  local seconds=$1
+  printf "%02dm %02ds" $((seconds / 60)) $((seconds % 60))
+}
+
+run_step() {
+  local label="$1"
+  shift
+
+  CURRENT_STEP="$label"
+  local start=$(date +%s)
+
+  print_step "$label"
+  "$@"
+
+  local end=$(date +%s)
+  local duration=$((end - start))
+
+  print_success "$label completed in $(format_time $duration)"
+}
+
+on_error() {
+  echo
+  print_error "Failed during: ${CURRENT_STEP:-unknown step}"
+  exit 1
+}
+
+trap on_error ERR
+
+# ===== START =====
+print_header "🧪 Test Environment Initialization"
+
+run_step "Starting Docker test stack" \
+  docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml up -d
+
+# ===== WAIT FOR MYSQL =====
+print_header "⏳ Waiting for services"
+
+print_step "Waiting for MySQL (auth)"
 until docker compose -p $PROJECT_NAME exec -T mysql-auth mysqladmin ping -h"localhost" --silent; do
-    sleep 1
+  sleep 1
 done
+print_success "MySQL is ready"
 
-# Wait for PHP-FPM services to be ready to handle connections
+# ===== SERVICE HEALTH =====
 wait_for_service() {
-      local name=$1
-      local url=$2
+  local name=$1
+  local url=$2
 
-    echo -e "${BLUE}Waiting for $name to be ready...${NC}"
+  print_step "Waiting for $name"
 
-    until docker compose -p $PROJECT_NAME exec -T $name curl -f "$url/health" > /dev/null 2>&1; do
-        sleep 1
-    done
+  until docker compose -p $PROJECT_NAME exec -T "$name" curl -f "$url/health" > /dev/null 2>&1; do
+    sleep 1
+  done
 
+  print_success "$name is ready"
 }
 
 wait_for_service auth-php http://auth-nginx
@@ -39,34 +102,43 @@ wait_for_service order-php http://order-nginx
 wait_for_service product-php http://product-nginx
 wait_for_service api-php http://api-nginx
 
-echo -e "${BLUE}Preparing test databases...${NC}"
-# Create databases if they don't exist (since init script only runs once per volume lifecycle)
-docker compose -p $PROJECT_NAME exec -T mysql-auth mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS auth_test;"
-docker compose -p $PROJECT_NAME exec -T mysql-orders mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS orders_test;"
-docker compose -p $PROJECT_NAME exec -T mysql-products mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS products_test;"
+# ===== MIGRATIONS =====
+print_header "⚙️ Running Migrations"
 
-# We need to run migrations on the test databases
-docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T auth-php php artisan migrate:fresh --force
-docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T order-php php artisan migrate:fresh --force
-docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T product-php php artisan migrate:fresh --force
+run_step "Auth migrations" \
+  docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T auth-php php artisan migrate:fresh --force
 
-echo -e "${GREEN}Environment ready. Running tests...${NC}"
+run_step "Order migrations" \
+  docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T order-php php artisan migrate:fresh --force
 
-echo -e "${BLUE}Running Auth Service Tests...${NC}"
-docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T auth-php ./vendor/bin/phpunit tests/Feature
+run_step "Product migrations" \
+  docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T product-php php artisan migrate:fresh --force
 
-echo -e "${BLUE}Running Order Service Tests...${NC}"
-docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T order-php ./vendor/bin/phpunit tests/Feature
+# ===== TESTS =====
+print_header "🧪 Running Tests"
 
-echo -e "${BLUE}Running Product Service Tests...${NC}"
-docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T product-php ./vendor/bin/phpunit tests/Feature
+run_step "Auth Service tests" \
+  docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T auth-php ./vendor/bin/phpunit tests/Feature
 
-echo -e "${BLUE}Running API Gateway Tests (including E2E)...${NC}"
-docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T api-php ./vendor/bin/phpunit tests/Feature tests/E2E
+run_step "Order Service tests" \
+  docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T order-php ./vendor/bin/phpunit tests/Feature
 
-echo -e "${GREEN}All tests completed!${NC}"
+run_step "Product Service tests" \
+  docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T product-php ./vendor/bin/phpunit tests/Feature
 
-# Optional: Stop the test environment
+run_step "API Gateway tests (Feature + E2E)" \
+  docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T api-php ./vendor/bin/phpunit tests/Feature tests/E2E
 
-echo -e "${BLUE}Stopping testing environment...${NC}"
-docker compose -p $PROJECT_NAME  -f docker-compose.yml -f docker-compose.test.yml down
+# ===== CLEANUP =====
+print_header "🧹 Cleanup"
+
+run_step "Stopping test environment" \
+  docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml down
+
+# ===== SUMMARY =====
+END_TIME=$(date +%s)
+TOTAL_DURATION=$((END_TIME - START_TIME))
+
+echo
+print_header "✅ All tests passed successfully"
+printf "${GREEN}Total duration:${NC} %s\n" "$(format_time $TOTAL_DURATION)"

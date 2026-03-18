@@ -40,9 +40,13 @@ fix-frontend:
 	docker compose exec -T frontend npm run lint -- --fix
 	docker compose exec -T frontend npm run format
 
-phpstan:
+check-service:
 	docker compose exec $(service) ./vendor/bin/phpstan analyse --memory-limit=2G
-
-pint:
 	docker compose exec $(service) ./vendor/bin/pint
+	docker compose exec $(service) ./vendor/bin/psalm
 
+check:
+	bash scripts/check.sh
+
+check-fe:
+	bash scripts/check.sh --frontend
