@@ -1,4 +1,4 @@
-import { api } from "./client";
+import {authApi} from "./client";
 
 type LoginPayload = {
   email: string;
@@ -22,13 +22,13 @@ type Response = {
 };
 
 export const login = async (payload: LoginPayload): Promise<LoginResponse> => {
-  const { data } = await api.post("/auth/login", payload);
+  const { data } = await authApi.post("/auth/login", payload);
 
   return data;
 };
 
 export const register = async (payload: RegisterPayload): Promise<Response> => {
-  const { data } = await api.post("/auth/register", payload);
+  const { data } = await authApi.post("/auth/register", payload);
 
   return data;
 };
