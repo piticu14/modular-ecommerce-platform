@@ -19,6 +19,7 @@ use Override;
  * @property string $currency,
  * @property int $stock_on_hand,
  * @property int $stock_reserved,
+ * @property int $stock_available,
  * @property ProductStatus $status,
  */
 class Product extends Model
@@ -29,7 +30,6 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'uuid',
         'name',
         'price',
         'currency',

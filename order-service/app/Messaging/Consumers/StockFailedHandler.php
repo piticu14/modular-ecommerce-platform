@@ -18,10 +18,14 @@ class StockFailedHandler
             $eventId = $event['event_id'];
             $orderUuid = $event['data']['order_uuid'];
 
-            if (ProcessedEvent::where([
+
+            $inserted = ProcessedEvent::insertOrIgnore([
                 'event_id' => $eventId,
                 'consumer' => 'stock_failed',
-            ])->lockForUpdate()->exists()) {
+                'processed_at' => now(),
+            ]);
+
+            if ($inserted === 0) {
                 return;
             }
 
@@ -37,11 +41,6 @@ class StockFailedHandler
                 'status' => OrderStatus::FAILED,
             ]);
 
-            ProcessedEvent::create([
-                'event_id' => $eventId,
-                'consumer' => 'stock_failed',
-                'processed_at' => now(),
-            ]);
 
             Log::warning('StockFailed received', [
                 'order_uuid' => $orderUuid,

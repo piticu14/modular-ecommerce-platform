@@ -7,6 +7,7 @@ mkdir -p storage/logs bootstrap/cache
 echo "Waiting for dependencies..."
 
 wait-for.sh mysql-auth 3306
+wait-for.sh redis 6379
 
 echo "Application ready."
 

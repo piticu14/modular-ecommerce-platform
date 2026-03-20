@@ -13,14 +13,20 @@ class AuthControllerTest extends TestCase
 
     public function test_user_can_register()
     {
-        $response = $this->postJson('/api/auth/register', [
+        $response = $this->postJson($this->api('/auth/register'), [
             'name' => 'John Doe',
             'email' => 'john@example.com',
             'password' => 'password123',
         ]);
 
         $response->assertStatus(201)
-            ->assertJson(['message' => 'User created']);
+            ->assertJsonStructure([
+                'id',
+                'name',
+                'email',
+                'created_at',
+                'updated_at',
+            ]);
 
         $this->assertDatabaseHas('users', [
             'email' => 'john@example.com',
@@ -32,7 +38,7 @@ class AuthControllerTest extends TestCase
     {
         User::factory()->create(['email' => 'john@example.com']);
 
-        $response = $this->postJson('/api/auth/register', [
+        $response = $this->postJson($this->api('/auth/register'), [
             'name' => 'John Doe',
             'email' => 'john@example.com',
             'password' => 'password123',
@@ -49,7 +55,7 @@ class AuthControllerTest extends TestCase
             'password' => 'password123',
         ]);
 
-        $response = $this->postJson('/api/auth/login', [
+        $response = $this->postJson($this->api('/auth/login'), [
             'email' => 'john@example.com',
             'password' => 'password123',
         ]);
@@ -69,7 +75,7 @@ class AuthControllerTest extends TestCase
             'password' => 'password123',
         ]);
 
-        $response = $this->postJson('/api/auth/login', [
+        $response = $this->postJson($this->api('/auth/login'), [
             'email' => 'john@example.com',
             'password' => 'wrongpassword',
         ]);
@@ -83,7 +89,7 @@ class AuthControllerTest extends TestCase
         $user = User::factory()->create();
         $token = JWTAuth::fromUser($user);
 
-        $response = $this->getJson('/api/auth/me', [
+        $response = $this->getJson($this->api('/auth/me'), [
             'Authorization' => 'Bearer '.$token,
         ]);
 
@@ -99,7 +105,7 @@ class AuthControllerTest extends TestCase
         $user = User::factory()->create();
         $token = JWTAuth::fromUser($user);
 
-        $response = $this->postJson('/api/auth/logout', [], [
+        $response = $this->postJson($this->api('/auth/logout'), [], [
             'Authorization' => 'Bearer '.$token,
         ]);
 
@@ -112,7 +118,7 @@ class AuthControllerTest extends TestCase
         $user = User::factory()->create();
         $token = JWTAuth::fromUser($user);
 
-        $response = $this->postJson('/api/auth/refresh', [], [
+        $response = $this->postJson($this->api('/auth/refresh'), [], [
             'Authorization' => 'Bearer '.$token,
         ]);
 

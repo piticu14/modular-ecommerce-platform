@@ -5,6 +5,7 @@ namespace App\Support;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Throwable;
 
 final class InternalHttp
@@ -18,6 +19,7 @@ final class InternalHttp
 
         $timestamp = (string) now()->timestamp;
         $secret = config('services.internal.token');
+        $nonce = (string) Str::uuid();
 
         if (! is_string($secret) || $secret === '') {
             throw new \RuntimeException('Internal token is not configured');
@@ -28,7 +30,7 @@ final class InternalHttp
             path: $path,
             userId: (string) RequestContext::userId(),
             correlationId: (string) RequestContext::correlationId(),
-            nonce: (string) RequestContext::correlationId(),
+            nonce: $nonce,
             timestamp: $timestamp,
             secret: $secret
         );
@@ -39,6 +41,7 @@ final class InternalHttp
             'X-Service-Name' => config('app.name'),
             'X-Timestamp' => $timestamp,
             'X-Internal-Signature' => $signature,
+            'X-Nonce' => $nonce,
         ];
 
         return Http::baseUrl($baseUrl)

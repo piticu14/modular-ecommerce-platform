@@ -23,6 +23,8 @@ class StoreOrderRequest extends FormRequest
             'items.required' => 'Pole items je povinné.',
             'items.array' => 'Pole items musí být array.',
             'items.min' => 'Objednávka musí obsahovat alespoň jednu položku.',
+            'items.*.product_uuid' => 'UUID produktu je povinné',
+            'items.*.quantity' => 'Množství musí být celé číslo v rozsahu 1-100.',
         ];
     }
 }

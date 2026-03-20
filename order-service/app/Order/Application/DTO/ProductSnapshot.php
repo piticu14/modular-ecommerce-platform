@@ -13,7 +13,7 @@ final readonly class ProductSnapshot
 
     /**
      * @param array{
-     *     uuid:string,
+     *     id:string,
      *     name:string,
      *     price:int,
      *     currency:string,
@@ -22,7 +22,7 @@ final readonly class ProductSnapshot
     public static function fromArray(array $data): self
     {
         return new self(
-            uuid: (string) $data['uuid'],
+            uuid: (string) $data['id'],
             name: (string) $data['name'],
             price: (int) $data['price'],
             currency: (string) $data['currency'],

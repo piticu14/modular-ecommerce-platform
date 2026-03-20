@@ -3,9 +3,11 @@ init:
 
 up:
 	docker compose up -d
+	docker compose --profile worker up -d
 
 down:
 	docker compose down
+	docker compose --profile worker down
 
 build:
 	docker compose build

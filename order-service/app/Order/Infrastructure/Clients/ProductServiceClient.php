@@ -78,7 +78,7 @@ class ProductServiceClient
 
         /**
          * @var array<int,array{
-         *     uuid:string,
+         *     id:string,
          *     name:string,
          *     price:int,
          *     currency:string,
@@ -88,7 +88,7 @@ class ProductServiceClient
         $map = [];
 
         foreach ($products as $product) {
-            $map[$product['uuid']] = ProductSnapshot::fromArray($product);
+            $map[$product['id']] = ProductSnapshot::fromArray($product);
         }
 
         foreach ($uuids as $uuid) {

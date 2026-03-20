@@ -25,7 +25,7 @@ class OrderControllerTest extends TestCase
     {
         Order::factory()->count(3)->create(['user_id' => 1]);
 
-        $response = $this->signedRequest('GET', '/api/orders');
+        $response = $this->signedRequest('GET', $this->api('/orders'));
 
         $response->assertStatus(200)
             ->assertJsonCount(3, 'data');
@@ -44,16 +44,12 @@ class OrderControllerTest extends TestCase
                         uuid: $productUuid,
                         name: 'Test Product',
                         price: '100',
-                        currency: 'USD',
-                        status: 'active',
-                        stock_on_hand: 10,
-                        stock_reserved: 0,
-                        stock_available: 10
+                        currency: 'CZK',
                     ),
                 ]);
         });
 
-        $response = $this->signedRequest('POST', '/api/orders', [
+        $response = $this->signedRequest('POST', $this->api('/orders'), [
             'items' => [
                 [
                     'product_uuid' => $productUuid,
@@ -64,18 +60,18 @@ class OrderControllerTest extends TestCase
 
         $response->assertStatus(201)
             ->assertJsonPath('data.total', 200)
-            ->assertJsonPath('data.status', 'PENDING');
+            ->assertJsonPath('data.status', OrderStatus::PENDING->value);
 
         $this->assertDatabaseHas('orders', [
             'user_id' => 1,
             'total' => 200,
-            'status' => 'PENDING',
+            'status' => OrderStatus::PENDING->value,
         ]);
     }
 
     public function test_cannot_create_order_with_empty_items()
     {
-        $response = $this->signedRequest('POST', '/api/orders', [
+        $response = $this->signedRequest('POST', $this->api('/orders'), [
             'items' => [],
         ]);
 
@@ -90,7 +86,7 @@ class OrderControllerTest extends TestCase
                 ->andThrow(new ProductServiceUnavailableException);
         });
 
-        $response = $this->signedRequest('POST', '/api/orders', [
+        $response = $this->signedRequest('POST', $this->api('/orders'), [
             'items' => [
                 ['product_uuid' => 'p1', 'quantity' => 1],
             ],
@@ -107,10 +103,7 @@ class OrderControllerTest extends TestCase
                 ->andThrow(new ProductNotFoundException('p1'));
         });
 
-        // The current controller doesn't catch ProductNotFoundException,
-        // it only catches OrderCreationFailedException.
-        // Let's see how it behaves. It probably results in 500 if not handled.
-        $response = $this->signedRequest('POST', '/api/orders', [
+        $response = $this->signedRequest('POST', $this->api('/orders'), [
             'items' => [
                 ['product_uuid' => 'p1', 'quantity' => 1],
             ],
@@ -123,7 +116,7 @@ class OrderControllerTest extends TestCase
     {
         $order = Order::factory()->create(['user_id' => 1]);
 
-        $response = $this->signedRequest('GET', "/api/orders/{$order->uuid}");
+        $response = $this->signedRequest('GET', $this->api("/orders/{$order->uuid}"));
 
         $response->assertStatus(200)
             ->assertJsonPath('data.id', $order->uuid);
@@ -136,7 +129,7 @@ class OrderControllerTest extends TestCase
             'status' => OrderStatus::PENDING->value,
         ]);
 
-        $response = $this->signedRequest('DELETE', "/api/orders/{$order->uuid}");
+        $response = $this->signedRequest('DELETE', $this->api("/orders/{$order->uuid}"));
 
         $response->assertStatus(204);
 
@@ -153,7 +146,7 @@ class OrderControllerTest extends TestCase
             'status' => OrderStatus::CONFIRMED->value,
         ]);
 
-        $response = $this->signedRequest('DELETE', "/api/orders/{$order->uuid}");
+        $response = $this->signedRequest('DELETE', $this->api("/orders/{$order->uuid}"));
 
         $response->assertStatus(409);
     }

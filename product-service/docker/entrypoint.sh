@@ -8,6 +8,7 @@ echo "Waiting for dependencies..."
 
 wait-for.sh mysql-products 3306
 wait-for.sh rabbitmq 5672
+wait-for.sh redis 6379
 
 echo "Application ready."
 

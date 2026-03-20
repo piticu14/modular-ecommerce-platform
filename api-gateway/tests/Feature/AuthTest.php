@@ -2,72 +2,92 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\VerifyJwt;
 use Firebase\JWT\JWT;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
-    public function test_register_proxies_to_auth_service()
+    public function test_proxies_register_user()
     {
-        $response = $this->postJson('/api/auth/register', [
-            'name' => 'Test User',
-            'email' => 'test'.rand().'@example.com',
-            'password' => 'password',
+        $this->fakeService('auth', '/auth/register', [
+            'data' => [
+                'name' => 'John Doe',
+                'email' => 'john@example.com',
+            ],
+        ], 201);
+
+        $this->withoutMiddleware(VerifyJwt::class);
+
+        $response = $this->postJson($this->api('/auth/register'), [
+            'name' => 'John Doe',
+            'email' => 'john@example.com',
+            'password' => 'password123',
         ]);
 
-        // We expect either success or a specific failure if auth service is down,
-        // but it should at least be routed correctly.
-        $this->assertContains($response->status(), [201, 422, 503]);
+        $response->assertStatus(201)
+            ->assertJsonPath('data.name', 'John Doe')
+            ->assertJsonPath('data.email', 'john@example.com');
     }
 
-    public function test_protected_route_requires_token()
+    public function test_proxies_login_user()
     {
-        $response = $this->getJson('/api/products');
+        $this->fakeService('auth', '/auth/login', [
+            'access_token' => 'token',
+        ]);
 
-        $response->assertStatus(401)
-            ->assertJson(['error' => 'Missing token']);
+        $this->withoutMiddleware(VerifyJwt::class);
+
+        $response = $this->postJson($this->api('/auth/login'), [
+            'email' => 'john@example.com',
+            'password' => 'password123',
+        ]);
+
+        $response->assertOk()
+            ->assertJson(['access_token' => 'token']);
     }
 
-    public function test_protected_route_accepts_valid_token()
+    public function test_proxies_get_me()
     {
-        $secret = config('services.jwt.secret');
-        $payload = [
-            'sub' => '123',
-            'iat' => time(),
-            'exp' => time() + 3600,
-        ];
-        $token = JWT::encode($payload, $secret, 'HS256');
+        $this->fakeService('auth', '/auth/me', [
+            'id' => 1,
+            'email' => 'john@example.com',
+        ]);
 
-        $response = $this->withHeader('Authorization', 'Bearer '.$token)
-            ->getJson('/api/products');
+        $this->withoutMiddleware(VerifyJwt::class);
 
-        // Should at least pass middleware and be proxied (e.g. 200 or 503)
-        $this->assertNotEquals(401, $response->status());
+        $response = $this->getJson($this->api('/auth/me'));
+
+        $response->assertOk()
+            ->assertJson(['email' => 'john@example.com']);
     }
 
-    public function test_protected_route_rejects_expired_token()
+    public function test_proxies_refresh_token()
     {
-        $secret = config('services.jwt.secret');
-        $payload = [
-            'sub' => '123',
-            'iat' => time() - 7200,
-            'exp' => time() - 3600,
-        ];
-        $token = JWT::encode($payload, $secret, 'HS256');
+        $this->fakeService('auth', '/auth/refresh', [
+            'access_token' => 'new-token',
+        ]);
 
-        $response = $this->withHeader('Authorization', 'Bearer '.$token)
-            ->getJson('/api/products');
+        $this->withoutMiddleware(VerifyJwt::class);
 
-        $response->assertStatus(401)
-            ->assertJson(['error' => 'Token expired']);
+        $response = $this->postJson($this->api('/auth/refresh'));
+
+        $response->assertOk()
+            ->assertJson(['access_token' => 'new-token']);
     }
 
-    public function test_protected_route_rejects_invalid_token()
+    public function test_proxies_logout()
     {
-        $response = $this->withHeader('Authorization', 'Bearer invalid-token')
-            ->getJson('/api/products');
+        $this->fakeService('auth', '/auth/logout', [
+            'message' => 'Logged out',
+        ]);
 
-        $response->assertStatus(401)
-            ->assertJson(['error' => 'Invalid token']);
+        $this->withoutMiddleware(VerifyJwt::class);
+
+        $response = $this->postJson($this->api('/auth/logout'));
+
+        $response->assertOk()
+            ->assertJson(['message' => 'Logged out']);
     }
+
 }

@@ -34,17 +34,6 @@ class MessageDispatcher
             return;
         }
 
-        $redisKey = "event:$eventId";
-
-        // Atomic deduplication (SET NX EX)
-        $ok = Redis::set($redisKey, 1, [
-            'nx',
-            'ex' => 86400,
-        ]);
-
-        if (! $ok) {
-            return;
-        }
 
         $eventType = $event['event_type'];
 

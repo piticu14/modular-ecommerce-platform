@@ -6,7 +6,6 @@ services:
       - ./docker/mysql/auth-test:/docker-entrypoint-initdb.d
 
   mysql-orders:
-    ports: !reset []
     volumes:
       - mysql-orders-test-data:/var/lib/mysql
       - ./docker/mysql/orders-test:/docker-entrypoint-initdb.d
@@ -19,6 +18,10 @@ services:
 
   rabbitmq:
     ports: !reset []
+    volumes:
+      - rabbitmq_testing_data:/var/lib/rabbitmq
+      - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
 
   redis:
     ports: !reset []
@@ -89,3 +92,4 @@ volumes:
   mysql-auth-test-data:
   mysql-orders-test-data:
   mysql-products-test-data:
+  rabbitmq_testing_data:

@@ -5,7 +5,7 @@ use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\ProductController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->group(function () {
+Route::prefix(config('api.prefix'))->group(function () {
     /*
     |--------------------------------------------------------------------------
     | AUTH (public)

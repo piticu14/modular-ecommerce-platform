@@ -18,7 +18,7 @@ class ProductControllerTest extends TestCase
         Product::factory()->create(['status' => ProductStatus::ACTIVE]);
         Product::factory()->create(['status' => ProductStatus::ARCHIVED]);
 
-        $response = $this->signedRequest('GET', '/api/products');
+        $response = $this->signedRequest('GET', $this->api("/products"));
 
         $response->assertStatus(200)
             ->assertJsonCount(2, 'data');
@@ -30,7 +30,11 @@ class ProductControllerTest extends TestCase
         $p2 = Product::factory()->create(['status' => ProductStatus::ACTIVE]);
         $p3 = Product::factory()->create(['status' => ProductStatus::ACTIVE]);
 
-        $response = $this->signedRequest('GET', "/api/products?ids={$p1->id},{$p2->id}");
+
+        $response = $this->signedRequest(
+            'GET',
+            $this->api("/products?ids={$p1->id},{$p2->id}")
+        );
 
         $response->assertStatus(200)
             ->assertJsonCount(2, 'data');
@@ -41,7 +45,12 @@ class ProductControllerTest extends TestCase
         $p1 = Product::factory()->create();
         $p2 = Product::factory()->create();
 
-        $response = $this->signedRequest('GET', "/api/products/by-uuid?uuids={$p1->uuid},{$p2->uuid}");
+
+
+        $response = $this->signedRequest(
+            'GET',
+            $this->api("/products/by-uuid?uuids={$p1->uuid},{$p2->uuid}")
+        );
 
         $response->assertStatus(200)
             ->assertJsonCount(2, 'data');
@@ -51,18 +60,21 @@ class ProductControllerTest extends TestCase
     {
         $product = Product::factory()->create();
 
-        $response = $this->signedRequest('GET', "/api/products/{$product->uuid}");
+        $response = $this->signedRequest(
+            'GET',
+            $this->api("/products/{$product->uuid}")
+        );
 
         $response->assertStatus(200)
-            ->assertJsonPath('data.uuid', $product->uuid);
+            ->assertJsonPath('data.id', $product->uuid);
     }
 
     public function test_can_create_product()
     {
-        $response = $this->signedRequest('POST', '/api/products', [
+        $response = $this->signedRequest('POST', $this->api("/products"), [
             'name' => 'New Product',
-            'price' => 150.50,
-            'currency' => 'USD',
+            'price' => 30000,
+            'currency' => 'CZK',
             'stock_on_hand' => 50,
         ]);
 
@@ -71,7 +83,7 @@ class ProductControllerTest extends TestCase
 
         $this->assertDatabaseHas('products', [
             'name' => 'New Product',
-            'price' => 150.50,
+            'price' => 30000,
             'status' => ProductStatus::ACTIVE->value,
         ]);
     }
@@ -80,7 +92,7 @@ class ProductControllerTest extends TestCase
     {
         $product = Product::factory()->create(['status' => ProductStatus::ACTIVE]);
 
-        $response = $this->signedRequest('DELETE', "/api/products/{$product->uuid}");
+        $response = $this->signedRequest('DELETE', $this->api("/products/{$product->uuid}"));
 
         $response->assertStatus(204);
 
@@ -94,7 +106,7 @@ class ProductControllerTest extends TestCase
     {
         $product = Product::factory()->create(['status' => ProductStatus::ARCHIVED]);
 
-        $response = $this->signedRequest('DELETE', "/api/products/{$product->uuid}");
+        $response = $this->signedRequest('DELETE', $this->api("/products/{$product->uuid}"));
 
         $response->assertStatus(409);
     }

@@ -21,7 +21,7 @@ class FullFlowTest extends TestCase
 
         try {
             // 1. Register User via API Gateway
-            $registerResponse = $this->postJson('/api/auth/register', [
+            $registerResponse = $this->postJson($this->api('/auth/register'), [
                 'name' => 'E2E User',
                 'email' => $email,
                 'password' => $password,
@@ -29,7 +29,7 @@ class FullFlowTest extends TestCase
             $registerResponse->assertStatus(201);
 
             // 2. Login User via API Gateway to get JWT
-            $loginResponse = $this->postJson('/api/auth/login', [
+            $loginResponse = $this->postJson($this->api('/auth/login'), [
                 'email' => $email,
                 'password' => $password,
             ]);
@@ -38,20 +38,19 @@ class FullFlowTest extends TestCase
             $this->assertNotEmpty($token);
 
             // 3. Create Product (via Gateway)
-            $productUuid = (string) Str::uuid();
             $productResponse = $this->withHeader('Authorization', 'Bearer '.$token)
-                ->postJson('/api/products', [
+                ->postJson($this->api('/products'), [
                     'name' => 'E2E Product',
                     'price' => 100,
-                    'currency' => 'USD',
+                    'currency' => 'CZK',
                     'stock_on_hand' => 50,
-                    'uuid' => $productUuid,
                 ]);
             $productResponse->assertStatus(201);
+            $productUuid = $productResponse->json('data.id');
 
             // 4. Create Order (via Gateway)
             $orderResponse = $this->withHeader('Authorization', 'Bearer '.$token)
-                ->postJson('/api/orders', [
+                ->postJson($this->api('/orders'), [
                     'items' => [
                         [
                             'product_uuid' => $productUuid,
@@ -67,7 +66,7 @@ class FullFlowTest extends TestCase
             sleep(5);
 
             $checkProductResponse = $this->withHeader('Authorization', 'Bearer '.$token)
-                ->getJson('/api/products/'.$productUuid);
+                ->getJson($this->api("/products/$productUuid"));
 
             $checkProductResponse->assertStatus(200);
             $this->assertEquals(2, $checkProductResponse->json('data.stock_reserved'), 'Stock should be reserved in product-service');
@@ -80,12 +79,12 @@ class FullFlowTest extends TestCase
                     // We can't actually DELETE orders via Gateway if there's no route,
                     // but we can CANCEL it if it exists.
                     $this->withHeader('Authorization', 'Bearer '.$token)
-                        ->deleteJson('/api/orders/'.$orderUuid);
+                        ->deleteJson($this->api("/orders/$orderUuid"));
                 }
 
                 if ($productUuid) {
                     $this->withHeader('Authorization', 'Bearer '.$token)
-                        ->deleteJson('/api/products/'.$productUuid);
+                        ->deleteJson($this->api("/products/$productUuid"));
                 }
 
                 // Note: Auth service usually doesn't have a delete user endpoint in this project.

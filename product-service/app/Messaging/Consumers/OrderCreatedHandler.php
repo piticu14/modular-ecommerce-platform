@@ -21,22 +21,17 @@ class OrderCreatedHandler
 
             $orderUuid = $event['data']['order_uuid'];
 
-            $exists = ProcessedEvent::where([
-                'event_id' => $eventId,
-                'consumer' => 'order_created',
-            ])->lockForUpdate()->exists();
-
-            if ($exists) {
-                return;
-            }
-
-            $this->reserveStock->handle($event);
-
-            ProcessedEvent::create([
+            $inserted = ProcessedEvent::insertOrIgnore([
                 'event_id' => $eventId,
                 'consumer' => 'order_created',
                 'processed_at' => now(),
             ]);
+
+            if ($inserted === 0) {
+                return;
+            }
+
+            $this->reserveStock->handle($event);
 
             Log::info('OrderCreated received', [
                 'order_uuid' => $orderUuid,

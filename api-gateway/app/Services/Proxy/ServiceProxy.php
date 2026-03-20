@@ -27,7 +27,7 @@ class ServiceProxy
                     'Authorization' => $request->header('Authorization'),
                     'X-User-Id' => $request->header('X-User-Id'),
                     'X-Service-Name' => config('app.name'),
-                    'X-Correlation-ID' => $request->header('X-Correlation-ID'),
+                    'X-Correlation-ID' => (string) $request->header('X-Correlation-ID'),
                     'Accept' => $request->header('Accept', 'application/json'),
                     'Content-Type' => $request->header('Content-Type', 'application/json'),
                     'Idempotency-Key' => $idempotencyKey,

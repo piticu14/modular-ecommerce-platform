@@ -52,7 +52,7 @@ run_seed() {
 
   print_step "Seeding $service"
 
-  if docker compose exec -T --user ${UID}:${GID} "$service" php artisan db:seed; then
+  if docker compose exec -T "$service" php artisan db:seed; then
     local end=$(date +%s)
     local duration=$((end - start))
     print_success "$service seeded in $(format_time $duration)"
@@ -67,6 +67,12 @@ print_header "🌱 Database Seeding Started"
 for service in "${SERVICES[@]}"; do
   run_seed "$service"
 done
+
+# ===== START =====
+print_header "🌱 Starting workers"
+
+docker compose --profile worker up -d
+
 
 # ===== SUMMARY =====
 END_TIME=$(date +%s)

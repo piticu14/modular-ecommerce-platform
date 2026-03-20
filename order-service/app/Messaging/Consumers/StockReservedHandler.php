@@ -17,10 +17,13 @@ class StockReservedHandler
             $eventId = $event['event_id'];
             $orderUuid = $event['data']['order_uuid'];
 
-            if (ProcessedEvent::where([
+            $inserted = ProcessedEvent::insertOrIgnore([
                 'event_id' => $eventId,
                 'consumer' => 'stock_reserved',
-            ])->lockForUpdate()->exists()) {
+                'processed_at' => now(),
+            ]);
+
+            if ($inserted === 0) {
                 return;
             }
 
@@ -33,13 +36,7 @@ class StockReservedHandler
             }
 
             $order->update([
-                'status' => OrderStatus::CONFIRMED,
-            ]);
-
-            ProcessedEvent::create([
-                'event_id' => $eventId,
-                'consumer' => 'stock_reserved',
-                'processed_at' => now(),
+                'status' => OrderStatus::CONFIRMED->value,
             ]);
 
             Log::info('StockReserved received', [

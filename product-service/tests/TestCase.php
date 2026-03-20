@@ -4,14 +4,22 @@ namespace Tests;
 
 use App\Support\InternalRequestSigner;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 
 abstract class TestCase extends BaseTestCase
 {
+
+    protected function api(string $path): string
+    {
+        return '/api/' . config('api.version') . $path;
+    }
+
     protected function signedRequest(string $method, string $uri, array $data = [], int $userId = 1): TestResponse
     {
         $timestamp = (string) now()->timestamp;
         $correlationId = 'test-correlation-id';
+        $nonce = (string) Str::uuid();
         $path = '/'.ltrim($uri, '/');
 
         $signature = InternalRequestSigner::sign(
@@ -19,6 +27,7 @@ abstract class TestCase extends BaseTestCase
             path: $path,
             userId: (string) $userId,
             correlationId: $correlationId,
+            nonce: $nonce,
             timestamp: $timestamp,
             secret: config('services.internal.token')
         );
@@ -28,6 +37,7 @@ abstract class TestCase extends BaseTestCase
             'X-Correlation-ID' => $correlationId,
             'X-Timestamp' => $timestamp,
             'X-Internal-Signature' => $signature,
+            'X-Nonce' => $nonce,
         ];
 
         return $this->json($method, $uri, $data, $headers);

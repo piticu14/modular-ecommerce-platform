@@ -41,6 +41,8 @@ class ProcessRabbitMQMessageJob extends BaseJob
                 'max_retries' => self::MAX_RETRIES,
                 'event_id' => $payload['event_id'],
                 'error' => $e->getMessage(),
+                'data' => $payload['data'],
+                'trace' => $e->getTraceAsString(), // 🔥 KLÍČOVÉ
             ]);
 
             if ($attempt >= self::MAX_RETRIES) {

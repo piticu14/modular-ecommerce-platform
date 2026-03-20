@@ -76,7 +76,7 @@ export default function CreateOrderPage() {
                   <>
                     {values.items.map((item, index) => {
                       const selectedProduct =
-                        productList.find((p) => p.uuid === item.product_uuid) ||
+                        productList.find((p) => p.id === item.product_uuid) ||
                         null;
 
                       return (
@@ -86,13 +86,13 @@ export default function CreateOrderPage() {
                             options={productList}
                             value={selectedProduct}
                             isOptionEqualToValue={(option, value) =>
-                              option.uuid === value.uuid
+                              option.id === value.id
                             }
                             getOptionLabel={(option) => option.name}
                             onChange={(_, value) =>
                               setFieldValue(
                                 `items.${index}.product_uuid`,
-                                value?.uuid ?? "",
+                                value?.id ?? "",
                               )
                             }
                             renderInput={(params) => (
