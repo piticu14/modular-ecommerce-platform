@@ -272,7 +272,9 @@ services:
     command:
       [
         "sh",
-        "/var/www/html/docker/wait-for.sh mysql-auth 3306",
+        "/var/www/html/docker/wait-for.sh",
+        "mysql-orders",
+        "3306",
         "php",
         "artisan",
         "outbox:work"
@@ -384,7 +386,9 @@ services:
     command:
       [
         "sh",
-        "/var/www/html/docker/wait-for-db.sh",
+        "/var/www/html/docker/wait-for.sh",
+        "mysql-products",
+        "3306",
         "php",
         "artisan",
         "outbox:work"

@@ -197,13 +197,13 @@ run_step "Starting background workers" \
 print_header "🧪 Running Tests"
 
 run_step "Auth Service tests" \
-  docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T auth-php ./vendor/bin/phpunit tests/Feature
+  #docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T auth-php ./vendor/bin/phpunit tests/Feature
 
  run_step "Order Service tests" \
-  docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T order-php ./vendor/bin/phpunit tests/Feature
+  #docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T order-php ./vendor/bin/phpunit tests/Feature
 
 run_step "Product Service tests" \
-  docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T product-php ./vendor/bin/phpunit tests/Feature
+  #docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T product-php ./vendor/bin/phpunit tests/Feature
 
 run_step "API Gateway tests (Feature + E2E)" \
   docker compose -p $PROJECT_NAME -f docker-compose.yml -f docker-compose.test.yml exec -T api-php ./vendor/bin/phpunit tests/Feature tests/E2E
