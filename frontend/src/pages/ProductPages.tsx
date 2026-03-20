@@ -87,8 +87,8 @@ export default function ProductsPage() {
 
         <TableBody>
           {products?.map((product) => (
-            <TableRow key={product.uuid}>
-              <TableCell>{product.uuid}</TableCell>
+            <TableRow key={product.id}>
+              <TableCell>{product.id}</TableCell>
               <TableCell>{product.name}</TableCell>
               <TableCell>{(product.price / 100).toFixed(2)}</TableCell>
               <TableCell>{product.currency}</TableCell>
@@ -101,7 +101,7 @@ export default function ProductsPage() {
                   <Button
                     size="small"
                     variant="outlined"
-                    onClick={() => navigate(`/products/${product.uuid}`)}
+                    onClick={() => navigate(`/products/${product.id}`)}
                   >
                     {intl.formatMessage({
                       id: "products.action.detail",
@@ -113,7 +113,7 @@ export default function ProductsPage() {
                     variant="outlined"
                     color="error"
                     disabled={deleteProduct.isPending}
-                    onClick={() => deleteProduct.mutate(product.uuid)}
+                    onClick={() => deleteProduct.mutate(product.id)}
                   >
                     {intl.formatMessage({
                       id: "products.action.delete",
