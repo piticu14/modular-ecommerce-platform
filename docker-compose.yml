@@ -269,16 +269,7 @@ services:
         APP_USER: ${UID}
         APP_GROUP: ${GID}
     user: "${UID}:${GID}"
-    command:
-      [
-        "sh",
-        "/var/www/html/docker/wait-for.sh",
-        "mysql-orders",
-        "3306",
-        "php",
-        "artisan",
-        "outbox:work"
-      ]
+    command: [ "sh", "/var/www/html/docker/outbox-work.sh" ]
     restart: on-failure
     volumes:
       - ./order-service:/var/www/html
@@ -383,16 +374,7 @@ services:
         APP_USER: ${UID}
         APP_GROUP: ${GID}
     user: "${UID}:${GID}"
-    command:
-      [
-        "sh",
-        "/var/www/html/docker/wait-for.sh",
-        "mysql-products",
-        "3306",
-        "php",
-        "artisan",
-        "outbox:work"
-      ]
+    command: [ "sh", "/var/www/html/docker/outbox-work.sh" ]
     restart: on-failure
     environment:
       APP_ENV: local

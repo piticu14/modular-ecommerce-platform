@@ -212,7 +212,7 @@ run_step "API Gateway tests (Feature + E2E)" \
 print_header "🧹 Cleanup"
 
 run_step "Stopping test environment" \
-# docker compose -p $PROJECT_NAME down -v
+docker compose -p $PROJECT_NAME down -v
 
 # ===== SUMMARY =====
 END_TIME=$(date +%s)

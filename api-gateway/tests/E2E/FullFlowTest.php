@@ -73,7 +73,7 @@
                         ->getJson($this->api("/products/$productUuid"));
 
                     $stockReserved = $response->json('data.stock_reserved');
-                    $stockAvailable = $response->json('data.stock_available'); // ✅ FIX
+                    $stockAvailable = $response->json('data.stock_available');
 
                     if ($stockReserved == 2) {
                         break;
