@@ -6,7 +6,6 @@ use App\Order\Domain\Models\Order;
 use App\Order\Domain\Models\OrderItem;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Log;
 use Override;
 
 /**

@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use Firebase\JWT\JWT;
-use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class ProtectedRoutesTest extends TestCase

@@ -1,4 +1,5 @@
 <?php
-    return [
-        'prefix' => env('API_PREFIX', 'v1'),
-    ];
+
+return [
+    'prefix' => env('API_PREFIX', 'v1'),
+];

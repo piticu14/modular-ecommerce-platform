@@ -3,7 +3,6 @@
 namespace App\Messaging\Dispatcher;
 
 use App\Messaging\Consumers\OrderCreatedHandler;
-use Illuminate\Support\Facades\Redis;
 
 class MessageDispatcher
 {
@@ -33,7 +32,6 @@ class MessageDispatcher
         if (! $eventId) {
             return;
         }
-
 
         $eventType = $event['event_type'];
 

@@ -9,7 +9,7 @@ abstract class TestCase extends BaseTestCase
 {
     protected function api(string $path): string
     {
-        return '/api/' . config('api.prefix') . $path;
+        return '/api/'.config('api.prefix').$path;
     }
 
     protected function fakeService(string $service, string $path, array $response, int $status = 200): void
@@ -21,7 +21,6 @@ abstract class TestCase extends BaseTestCase
         $serviceVersion = $serviceConfig['version_map'][$gatewayVersion] ?? $gatewayVersion;
 
         $baseUrl = $serviceConfig['url'];
-
 
         Http::fake([
             sprintf(

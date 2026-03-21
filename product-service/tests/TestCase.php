@@ -9,10 +9,9 @@ use Illuminate\Testing\TestResponse;
 
 abstract class TestCase extends BaseTestCase
 {
-
     protected function api(string $path): string
     {
-        return '/api/' . config('api.version') . $path;
+        return '/api/'.config('api.version').$path;
     }
 
     protected function signedRequest(string $method, string $uri, array $data = [], int $userId = 1): TestResponse

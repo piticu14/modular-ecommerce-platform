@@ -1,92 +1,93 @@
 <?php
 
-    namespace App\Console\Commands;
+namespace App\Console\Commands;
 
-    use App\Messaging\Infrastructure\Models\OutboxEvent;
-    use App\Messaging\Publishers\RabbitPublisher;
-    use Illuminate\Console\Command;
-    use Illuminate\Support\Facades\DB;
-    use Throwable;
+use App\Messaging\Infrastructure\Models\OutboxEvent;
+use App\Messaging\Publishers\RabbitPublisher;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
-    class OutboxWorkCommand extends Command
+class OutboxWorkCommand extends Command
+{
+    protected $signature = 'outbox:work';
+
+    protected bool $running = true;
+
+    public function handle(RabbitPublisher $publisher): int
     {
-        protected $signature = 'outbox:work';
+        $this->info('Outbox worker started');
 
-        protected bool $running = true;
+        pcntl_async_signals(true);
+        pcntl_signal(SIGTERM, fn () => $this->shutdown());
+        pcntl_signal(SIGINT, fn () => $this->shutdown());
 
-        public function handle(RabbitPublisher $publisher): int
-        {
-            $this->info('Outbox worker started');
+        while ($this->running) {
 
-            pcntl_async_signals(true);
-            pcntl_signal(SIGTERM, fn () => $this->shutdown());
-            pcntl_signal(SIGINT, fn () => $this->shutdown());
+            try {
+                DB::reconnect();
 
-            while ($this->running) {
+                $events = DB::transaction(function () {
 
-                try {
-                    DB::reconnect();
+                    return OutboxEvent::query()
+                        ->whereNull('published_at')
+                        ->orderBy('occurred_at')
+                        ->limit(100)
+                        ->lock('FOR UPDATE SKIP LOCKED')
+                        ->get();
 
-                    $events = DB::transaction(function () {
+                });
 
-                        return OutboxEvent::query()
-                            ->whereNull('published_at')
-                            ->orderBy('occurred_at')
-                            ->limit(100)
-                            ->lock('FOR UPDATE SKIP LOCKED')
-                            ->get();
+                if ($events->isEmpty()) {
+                    usleep(200000); // 200ms
 
-                    });
-
-                    if ($events->isEmpty()) {
-                        usleep(200000); // 200ms
-                        continue;
-                    }
-
-                    foreach ($events as $event) {
-
-                        try {
-                            logger()->info('Publishing event', [
-                                'event_id' => $event->id,
-                                'event_type' => $event->event_type,
-                                'routing_key' => $event->routing_key,
-                            ]);
-
-                            $publisher->publish($event);
-
-                            $event->forceFill([
-                                'published_at' => now(),
-                            ])->save();
-
-                        } catch (Throwable $e) {
-
-                            $event->increment('attempts');
-
-                            logger()->error('Outbox publish failed', [
-                                'event_id' => $event->id,
-                                'error' => $e->getMessage(),
-                            ]);
-                        }
-                    }
-
-                } catch (Throwable $e) {
-
-                    logger()->warning('Outbox worker loop failed, retrying...', [
-                        'error' => $e->getMessage(),
-                    ]);
-
-                    DB::disconnect();
-
-                    usleep(500000); // 500ms
+                    continue;
                 }
+
+                foreach ($events as $event) {
+
+                    try {
+                        logger()->info('Publishing event', [
+                            'event_id' => $event->id,
+                            'event_type' => $event->event_type,
+                            'routing_key' => $event->routing_key,
+                        ]);
+
+                        $publisher->publish($event);
+
+                        $event->forceFill([
+                            'published_at' => now(),
+                        ])->save();
+
+                    } catch (Throwable $e) {
+
+                        $event->increment('attempts');
+
+                        logger()->error('Outbox publish failed', [
+                            'event_id' => $event->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+
+            } catch (Throwable $e) {
+
+                logger()->warning('Outbox worker loop failed, retrying...', [
+                    'error' => $e->getMessage(),
+                ]);
+
+                DB::disconnect();
+
+                usleep(500000); // 500ms
             }
-
-            return self::SUCCESS;
         }
 
-        protected function shutdown(): void
-        {
-            logger()->info('Outbox worker shutting down');
-            $this->running = false;
-        }
+        return self::SUCCESS;
     }
+
+    protected function shutdown(): void
+    {
+        logger()->info('Outbox worker shutting down');
+        $this->running = false;
+    }
+}

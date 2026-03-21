@@ -18,7 +18,7 @@ class ProductControllerTest extends TestCase
         Product::factory()->create(['status' => ProductStatus::ACTIVE]);
         Product::factory()->create(['status' => ProductStatus::ARCHIVED]);
 
-        $response = $this->signedRequest('GET', $this->api("/products"));
+        $response = $this->signedRequest('GET', $this->api('/products'));
 
         $response->assertStatus(200)
             ->assertJsonCount(2, 'data');
@@ -29,7 +29,6 @@ class ProductControllerTest extends TestCase
         $p1 = Product::factory()->create(['status' => ProductStatus::ACTIVE]);
         $p2 = Product::factory()->create(['status' => ProductStatus::ACTIVE]);
         $p3 = Product::factory()->create(['status' => ProductStatus::ACTIVE]);
-
 
         $response = $this->signedRequest(
             'GET',
@@ -44,8 +43,6 @@ class ProductControllerTest extends TestCase
     {
         $p1 = Product::factory()->create();
         $p2 = Product::factory()->create();
-
-
 
         $response = $this->signedRequest(
             'GET',
@@ -71,7 +68,7 @@ class ProductControllerTest extends TestCase
 
     public function test_can_create_product()
     {
-        $response = $this->signedRequest('POST', $this->api("/products"), [
+        $response = $this->signedRequest('POST', $this->api('/products'), [
             'name' => 'New Product',
             'price' => 30000,
             'currency' => 'CZK',

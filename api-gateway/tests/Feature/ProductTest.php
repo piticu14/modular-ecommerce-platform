@@ -8,7 +8,6 @@ use Tests\TestCase;
 
 class ProductTest extends TestCase
 {
-
     public function test_proxies_get_products()
     {
         $this->fakeService('products', '/products', [
@@ -82,11 +81,9 @@ class ProductTest extends TestCase
 
         $this->withoutMiddleware(VerifyJwt::class);
 
-
         $response = $this->getJson($this->api("/products/{$productUuid}/stock-reservations"));
 
         $response->assertOk()
             ->assertJson(['data' => []]);
     }
-
 }

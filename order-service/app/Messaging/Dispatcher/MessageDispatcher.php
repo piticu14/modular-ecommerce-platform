@@ -4,7 +4,6 @@ namespace App\Messaging\Dispatcher;
 
 use App\Messaging\Consumers\StockFailedHandler;
 use App\Messaging\Consumers\StockReservedHandler;
-use Illuminate\Support\Facades\Redis;
 
 class MessageDispatcher
 {

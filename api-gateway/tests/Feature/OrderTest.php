@@ -3,13 +3,11 @@
 namespace Tests\Feature;
 
 use App\Http\Middleware\VerifyJwt;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class OrderTest extends TestCase
 {
-
     public function test_proxies_get_orders()
     {
         $this->fakeService('orders', '/orders', [
@@ -52,12 +50,12 @@ class OrderTest extends TestCase
         $this->withoutMiddleware(VerifyJwt::class);
 
         $response = $this->postJson($this->api('/orders'), [
-           'items' => [
-               [
-                   'product_uuid' => $productUuid,
-                   'quantity' => 1,
-               ]
-           ]
+            'items' => [
+                [
+                    'product_uuid' => $productUuid,
+                    'quantity' => 1,
+                ],
+            ],
         ]);
 
         $response->assertStatus(201)

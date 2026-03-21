@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Http\Middleware\VerifyJwt;
-use Firebase\JWT\JWT;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -89,5 +88,4 @@ class AuthTest extends TestCase
         $response->assertOk()
             ->assertJson(['message' => 'Logged out']);
     }
-
 }

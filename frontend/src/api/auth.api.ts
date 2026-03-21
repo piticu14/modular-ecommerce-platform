@@ -1,4 +1,4 @@
-import {authApi} from "./client";
+import { authApi } from "./client";
 
 type LoginPayload = {
   email: string;

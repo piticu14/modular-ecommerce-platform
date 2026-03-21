@@ -18,7 +18,6 @@ class StockFailedHandler
             $eventId = $event['event_id'];
             $orderUuid = $event['data']['order_uuid'];
 
-
             $inserted = ProcessedEvent::insertOrIgnore([
                 'event_id' => $eventId,
                 'consumer' => 'stock_failed',
@@ -40,7 +39,6 @@ class StockFailedHandler
             $order->update([
                 'status' => OrderStatus::FAILED,
             ]);
-
 
             Log::warning('StockFailed received', [
                 'order_uuid' => $orderUuid,
