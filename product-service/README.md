@@ -28,7 +28,11 @@ All endpoints are prefixed with `/api/v1/products`.
 - `GET /by-uuid` - Find products by multiple UUIDs
 - `GET /{id}/stock-reservations` - List stock reservations for a product
 
+## API Documentation
+
+The API documentation is available at `docs/api`.
+
 ## Events
 
-- **Publishes**: `StockReserved`, `StockReleased`, `ProductCreated`, `ProductUpdated`, `ProductDeleted`.
-- **Consumes**: `OrderCreated` (to trigger stock reservation), `OrderCancelled` (to release stock).
+- **Publishes**: `StockReserved`, `StockFailed`.
+- **Consumes**: `OrderCreated` (to trigger stock reservation)

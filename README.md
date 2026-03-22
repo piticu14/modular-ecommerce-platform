@@ -10,34 +10,74 @@ The project follows a microservices architecture where each service is responsib
 
 ```mermaid
 graph TD
-    Client[Frontend / Client] --> Gateway[API Gateway]
-    
-    subgraph Services
-        Gateway --> Auth[Auth Service]
-        Gateway --> Product[Product Service]
-        Gateway --> Order[Order Service]
+    subgraph Frontend
+        FE[Frontend Application]
+    end
+
+    subgraph "API Gateway"
+        API[API Gateway]
+    end
+
+    subgraph "Core Services"
+        Auth[Auth Service]
+        Order[Order Service]
+        Product[Product Service]
     end
 
     subgraph Infrastructure
-        Auth --- AuthDB[(MySQL Auth)]
-        Product --- ProductDB[(MySQL Product)]
-        Order --- OrderDB[(MySQL Order)]
-        
-        Auth --- Rabbit[RabbitMQ]
-        Product --- Rabbit
-        Order --- Rabbit
-        
-        Gateway --- Redis[Redis]
-        Auth --- Redis
-        Product --- Redis
-        Order --- Redis
+        Rabbit[RabbitMQ]
+        DBs[(Databases)]
     end
 
-    Order -- Event: OrderCreated --> Rabbit
-    Rabbit -- Event: OrderCreated --> Product
-    Product -- Event: StockReserved --> Rabbit
-    Rabbit -- Event: StockReserved --> Order
+    %% Client Interactions
+    FE -->|login / register| API
+    API -->|proxy| Auth
+
+    FE -->|create / remove / list / detail orders| API
+    API -->|proxy| Order
+
+    FE -->|create / remove / list / detail products| API
+    API -->|proxy| Product
+
+    %% Order Workflow
+    Order -.->|1. Create Order & Outbox| DBs
+    Order -.->|2. Publish OrderCreated| Rabbit
+    Rabbit -.->|3. Consume OrderCreated| Product
+    Product -.->|4. Reserve Stock & Outbox| DBs
+    Product -.->|5. Publish StockReserved| Rabbit
+    Rabbit -.->|6. Consume StockReserved| Order
+    Order -.->|7. Update Order Status| DBs
 ```
+
+## Order Creation Workflow
+
+The platform uses an asynchronous, event-driven approach for order processing to ensure consistency across microservices:
+
+1.  **Frontend**: Sends a create order request to the **API Gateway**.
+2.  **API Gateway**: Proxies the request to the **Order Service**.
+3.  **Order Service**: 
+    - Validates the request.
+    - Creates an order in `PENDING` state.
+    - Records an `OrderCreated` event in its **Transactional Outbox**.
+4.  **Relay (Worker)**: A background job picks up the event from the outbox and sends it to **RabbitMQ**.
+5.  **Product Service**: 
+    - Listens for `OrderCreated` events.
+    - Reserves the requested stock in its database.
+    - Records a `StockReserved` event in its **Transactional Outbox**.
+6.  **Relay (Worker)**: A background job picks up the event and sends it to **RabbitMQ**.
+7.  **Order Service**:
+    - Listens for `StockReserved` events.
+    - Updates the order status to `CONFIRMED` (or `FAILED` if stock was unavailable).
+
+## Documentation
+
+The API documentation is automatically generated using [Scramble](https://scramble.dedoc.co/).
+
+- **URL**: `/docs/api` (accessible on the API Gateway)
+- **Generation**: The documentation can be built using the following command:
+  ```bash
+  make docs-build
+  ```
 
 ## Microservices
 
@@ -63,25 +103,24 @@ graph TD
 ### Installation
 
 1. Clone the repository.
-2. Run the initialization script:
+2. Run the initialization command:
    ```bash
    make init
    ```
-3. Build and start the services:
-   ```bash
-   make build
-   make up
-   ```
-4. Seed the databases:
-   ```bash
-   make seed
-   ```
+   > **Note:** `make init` will handle environment setup, start the containers, install dependencies, and run migrations. There is no need to run `make up` separately after `init`.
+
+### Demo User
+
+For testing purposes, a demo user is seeded during initialization:
+
+- **Username**: `demo@example.com`
+- **Password**: `password`
 
 ## Makefile Commands
 
 | Command | Description |
 |---------|-------------|
-| `make init` | Runs `scripts/init.sh` to initialize the project (env files, etc.) |
+| `make init` | **Recommended.** Initializes and runs the project (envs, docker up, composer, migrations) |
 | `make up` | Starts all services and workers in detached mode |
 | `make down` | Stops all services and workers |
 | `make build` | Builds/Rebuilds docker images |
@@ -89,8 +128,14 @@ graph TD
 | `make composer service=...` | Runs `composer install` in the specified service |
 | `make seed` | Runs `scripts/seed.sh` to populate databases with demo data |
 | `make test` | Runs the full test suite via `scripts/run-tests.sh` |
-| `make check` | Runs static analysis (PHPStan, Pint, Psalm) for all services |
+| `make docs-build` | Generates API documentation using Scramble |
+| `make docs-clean` | Removes generated API documentation |
+| `make docs-debug` | Generates API documentation with verbose debug output |
+| `make check-frontend` | Runs linting, type checks, and format checks for frontend |
 | `make fix-frontend` | Automatically fixes linting/formatting issues in the frontend |
+| `make check-service service=...` | Runs PHPStan, Pint, and Psalm for a specific service |
+| `make check` | Runs all static analysis checks for the whole project |
+| `make check-fe` | Runs static analysis checks for the frontend |
 
 ## Testing
 

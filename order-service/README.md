@@ -26,6 +26,10 @@ All endpoints are prefixed with `/api/v1/orders`.
 - `GET /{id}` - Get order details
 - `DELETE /{id}` - Delete/Cancel an order
 
+## API Documentation
+
+The API documentation is available at `docs/api`.
+
 ## Background Workers
 
 - **Queue Worker**: Processes standard Laravel jobs (`php artisan queue:work rabbitmq`).
@@ -33,5 +37,5 @@ All endpoints are prefixed with `/api/v1/orders`.
 
 ## Events
 
-- **Consumes**: Events from Product Service (e.g., StockReserved).
-- **Publishes**: Order-related events (e.g., OrderCreated, OrderCancelled).
+- **Publishes**: `OrderCreated`.
+- **Consumes**: `StockReserved`, `StockFailed`.

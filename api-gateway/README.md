@@ -36,6 +36,10 @@ The API Gateway is the single entry point for all client requests. It handles ro
 - `POST /api/v1/orders` - Place a new order (Protected)
 - `DELETE /api/v1/orders/{id}` - Cancel/Delete order (Protected)
 
+## API Documentation
+
+The API documentation is available at `docs/api`.
+
 ## Configuration
 
 The gateway requires the following environment variables to be set (see `.env.example`):

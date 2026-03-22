@@ -133,6 +133,12 @@ for service in "${DB_SERVICES[@]}"; do
     docker compose exec -T "$service" php artisan migrate:fresh --force
 done
 
+# ===== SEED DEMO USER =====
+run_step "Seeding demo user (auth-php)" \
+  docker compose exec -T auth-php php artisan db:seed --force
+
+print_step "Skipping seeding for order/product services (avoiding junk data)"
+
 # ===== SUMMARY =====
 END_TIME=$(date +%s)
 TOTAL_DURATION=$((END_TIME - START_TIME))

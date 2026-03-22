@@ -6,7 +6,6 @@ The Auth Service manages user registration, authentication, and JWT token issuan
 
 - **User Management**: Registration and user profile management.
 - **Authentication**: JWT-based login and token refresh.
-- **Event Sourcing/Distribution**: Dispatches user-related events via RabbitMQ (e.g., UserCreated).
 - **Security**: Password hashing and secure token management.
 
 ## Tech Stack
@@ -14,7 +13,6 @@ The Auth Service manages user registration, authentication, and JWT token issuan
 - **Framework**: Laravel 11.x
 - **Database**: MySQL (auth database)
 - **Cache/Session**: Redis
-- **Messaging**: RabbitMQ
 
 ## API Endpoints
 
@@ -26,6 +24,28 @@ All endpoints are prefixed with `/api/v1/auth`.
 - `POST /refresh` - Refresh current JWT (Protected)
 - `GET /me` - Get authenticated user details (Protected)
 
-## Events Dispatched
+## API Documentation
 
-- `UserCreated`: Broadcast when a new user registers.
+The API documentation is available at `docs/api`.
+
+## Demo User
+
+For testing purposes, you can use the following credentials:
+
+- **Username**: `demo@example.com`
+- **Password**: `password`
+
+```php
+User::updateOrCreate(
+    ['email' => 'demo@example.com'],
+    [
+        'name' => 'Demo User',
+        'password' => 'password',
+    ]
+);
+```
+
+## Events
+
+- **Publishes**: None.
+- **Consumes**: None.
